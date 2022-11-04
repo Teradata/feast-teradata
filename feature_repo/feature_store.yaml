@@ -1,0 +1,13 @@
+project: repo
+registry: registry.db
+provider: local
+online_store:
+    type: sqlite
+    path: online_store.db
+offline_store:
+    type: feast_teradata.teradata.TeradataOfflineStore
+    host: tdprd.td.teradata.com
+    database: mw255040
+    user: mw255040
+    password: "Type your password"
+    log_mech: LDAP
