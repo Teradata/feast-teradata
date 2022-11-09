@@ -48,6 +48,7 @@ from feast.types import Float32, Float64, Int64
 
 from .teradata_source import (
     TeradataSource,
+    teradata_type_to_feast_value_type,
     df_to_teradata_table)
 
 
@@ -71,7 +72,7 @@ class TeradataOfflineStore(OfflineStore):
         end_date: datetime,
     ) -> RetrievalJob:
         assert isinstance(config.offline_store, TeradataOfflineStoreConfig)
-        assert isinstance(data_source, TeradataConfig)
+        assert isinstance(data_source, TeradataSource)
         from_expression = data_source.get_table_query_string()
 
         partition_by_join_key_string = ", ".join(_append_alias(join_key_columns, "a"))
@@ -98,10 +99,12 @@ class TeradataOfflineStore(OfflineStore):
                 SELECT {a_field_string},
                 ROW_NUMBER() OVER({partition_by_join_key_string} ORDER BY {timestamp_desc_string}) AS _feast_row
                 FROM ({from_expression}) a
-                WHERE a."{timestamp_field}" BETWEEN '{start_date}'::timestamptz AND '{end_date}'::timestamptz
+                WHERE a."{timestamp_field}" BETWEEN '{start_date}' AND '{end_date}'
             ) b
             WHERE _feast_row = 1
             """
+
+        print(query)
 
         return TeradataRetrievalJob(
             query=query,
