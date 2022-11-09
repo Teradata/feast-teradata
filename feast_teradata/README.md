@@ -1,2 +1,0 @@
-# Feast Teradata Connector
-

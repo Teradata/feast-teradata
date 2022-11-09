@@ -32,44 +32,39 @@ from feast.infra.offline_stores.offline_store import (
     RetrievalMetadata,
 )
 from feast.infra.registry.registry import Registry
-from feast_teradata.teradata_source import (
-    _get_conn,
-    SavedDatasetTeradataStorage,
+from feast_teradata.teradata_utils import (
+    get_conn,
+    TeradataConfig,
     teradata_type_to_feast_value_type,
-    TeradataConfig
+)
+from feast_teradata.offline.teradata_source import (
+    TeradataSource,
+    df_to_teradata_table
 )
 from feast.on_demand_feature_view import OnDemandFeatureView
 from feast.repo_config import RepoConfig
 from feast.saved_dataset import SavedDatasetStorage
-from feast.type_map import pg_type_code_to_arrow
 from feast.usage import log_exceptions_and_usage
-
-from feast.types import Float32, Float64, Int64
-
-from .teradata_source import (
-    TeradataSource,
-    teradata_type_to_feast_value_type,
-    df_to_teradata_table)
 
 
 class TeradataOfflineStoreConfig(TeradataConfig):
     type: Literal[
-        "feast_teradata.teradata.TeradataOfflineStore"
-    ] = "feast_teradata.teradata.TeradataOfflineStore"
+        "feast_teradata.offline.teradata.TeradataOfflineStore"
+    ] = "feast_teradata.offline.teradata.TeradataOfflineStore"
 
 
 class TeradataOfflineStore(OfflineStore):
     @staticmethod
     @log_exceptions_and_usage(offline_store="teradata")
     def pull_latest_from_table_or_query(
-        config: RepoConfig,
-        data_source: DataSource,
-        join_key_columns: List[str],
-        feature_name_columns: List[str],
-        timestamp_field: str,
-        created_timestamp_column: Optional[str],
-        start_date: datetime,
-        end_date: datetime,
+            config: RepoConfig,
+            data_source: DataSource,
+            join_key_columns: List[str],
+            feature_name_columns: List[str],
+            timestamp_field: str,
+            created_timestamp_column: Optional[str],
+            start_date: datetime,
+            end_date: datetime,
     ) -> RetrievalJob:
         assert isinstance(config.offline_store, TeradataOfflineStoreConfig)
         assert isinstance(data_source, TeradataSource)
@@ -78,7 +73,7 @@ class TeradataOfflineStore(OfflineStore):
         partition_by_join_key_string = ", ".join(_append_alias(join_key_columns, "a"))
         if partition_by_join_key_string != "":
             partition_by_join_key_string = (
-                "PARTITION BY " + partition_by_join_key_string
+                    "PARTITION BY " + partition_by_join_key_string
             )
         timestamps = [timestamp_field]
         if created_timestamp_column:
@@ -116,13 +111,13 @@ class TeradataOfflineStore(OfflineStore):
     @staticmethod
     @log_exceptions_and_usage(offline_store="teradata")
     def get_historical_features(
-        config: RepoConfig,
-        feature_views: List[FeatureView],
-        feature_refs: List[str],
-        entity_df: Union[pd.DataFrame, str],
-        registry: Registry,
-        project: str,
-        full_feature_names: bool = False,
+            config: RepoConfig,
+            feature_views: List[FeatureView],
+            feature_refs: List[str],
+            entity_df: Union[pd.DataFrame, str],
+            registry: Registry,
+            project: str,
+            full_feature_names: bool = False,
     ) -> RetrievalJob:
         assert isinstance(config.offline_store, TeradataOfflineStoreConfig)
         for fv in feature_views:
@@ -181,7 +176,7 @@ class TeradataOfflineStore(OfflineStore):
                 )
             finally:
                 if table_name:
-                    with _get_conn(config.offline_store).connect() as conn:
+                    with get_conn(config.offline_store).connect() as conn:
                         conn.execute(f"DROP TABLE {table_name};")
 
         return TeradataRetrievalJob(
@@ -202,13 +197,13 @@ class TeradataOfflineStore(OfflineStore):
     @staticmethod
     @log_exceptions_and_usage(offline_store="teradata")
     def pull_all_from_table_or_query(
-        config: RepoConfig,
-        data_source: DataSource,
-        join_key_columns: List[str],
-        feature_name_columns: List[str],
-        timestamp_field: str,
-        start_date: datetime,
-        end_date: datetime,
+            config: RepoConfig,
+            data_source: DataSource,
+            join_key_columns: List[str],
+            feature_name_columns: List[str],
+            timestamp_field: str,
+            start_date: datetime,
+            end_date: datetime,
     ) -> RetrievalJob:
         assert isinstance(config.offline_store, TeradataOfflineStoreConfig)
         assert isinstance(data_source, TeradataSource)
@@ -237,12 +232,12 @@ class TeradataOfflineStore(OfflineStore):
 
 class TeradataRetrievalJob(RetrievalJob):
     def __init__(
-        self,
-        query: Union[str, Callable[[], ContextManager[str]]],
-        config: RepoConfig,
-        full_feature_names: bool,
-        on_demand_feature_views: Optional[List[OnDemandFeatureView]],
-        metadata: Optional[RetrievalMetadata] = None,
+            self,
+            query: Union[str, Callable[[], ContextManager[str]]],
+            config: RepoConfig,
+            full_feature_names: bool,
+            on_demand_feature_views: Optional[List[OnDemandFeatureView]],
+            metadata: Optional[RetrievalMetadata] = None,
     ):
         if not isinstance(query, str):
             self._query_generator = query
@@ -277,7 +272,7 @@ class TeradataRetrievalJob(RetrievalJob):
 
     def _to_arrow_internal(self) -> pa.Table:
         with self._query_generator() as query:
-            with _get_conn(self.config.offline_store).raw_connection().cursor() as cur:
+            with get_conn(self.config.offline_store).raw_connection().cursor() as cur:
                 cur.execute(query)
                 fields = [
                     (c[0], teradata_type_to_feast_value_type(c[1]))
@@ -306,14 +301,14 @@ class TeradataRetrievalJob(RetrievalJob):
 
 
 def _get_entity_df_event_timestamp_range(
-    entity_df: Union[pd.DataFrame, str],
-    entity_df_event_timestamp_col: str,
-    config: RepoConfig,
+        entity_df: Union[pd.DataFrame, str],
+        entity_df_event_timestamp_col: str,
+        config: RepoConfig,
 ) -> Tuple[datetime, datetime]:
     if isinstance(entity_df, pd.DataFrame):
         entity_df_event_timestamp = entity_df.loc[
-            :, entity_df_event_timestamp_col
-        ].infer_objects()
+                                    :, entity_df_event_timestamp_col
+                                    ].infer_objects()
         if pd.api.types.is_string_dtype(entity_df_event_timestamp):
             entity_df_event_timestamp = pd.to_datetime(
                 entity_df_event_timestamp, utc=True
@@ -325,7 +320,7 @@ def _get_entity_df_event_timestamp_range(
     elif isinstance(entity_df, str):
         # If the entity_df is a string (SQL query), determine range
         # from table
-        with _get_conn(config.offline_store).raw_connection().cursor() as cur:
+        with get_conn(config.offline_store).raw_connection().cursor() as cur:
             cur.execute(
                 f"SELECT MIN({entity_df_event_timestamp_col}) AS min_ts, MAX({entity_df_event_timestamp_col}) AS max_ts FROM ({entity_df}) as tmp_alias"
             ),
@@ -342,12 +337,12 @@ def _append_alias(field_names: List[str], alias: str) -> List[str]:
 
 
 def build_point_in_time_query(
-    feature_view_query_contexts: List[dict],
-    left_table_query_string: str,
-    entity_df_event_timestamp_col: str,
-    entity_df_columns: KeysView[str],
-    query_template: str,
-    full_feature_names: bool = False,
+        feature_view_query_contexts: List[dict],
+        left_table_query_string: str,
+        entity_df_event_timestamp_col: str,
+        entity_df_columns: KeysView[str],
+        query_template: str,
+        full_feature_names: bool = False,
 ) -> str:
     """Build point-in-time query between each feature view table and the entity dataframe for teradata"""
     template = Environment(loader=BaseLoader()).from_string(source=query_template)
@@ -382,13 +377,13 @@ def build_point_in_time_query(
 
 
 def _upload_entity_df(
-    config: RepoConfig, entity_df: Union[pd.DataFrame, str], table_name: str
+        config: RepoConfig, entity_df: Union[pd.DataFrame, str], table_name: str
 ):
     if isinstance(entity_df, pd.DataFrame):
         # If the entity_df is a pandas dataframe, upload it to Postgres
         df_to_teradata_table(config.offline_store, entity_df, table_name)
     elif isinstance(entity_df, str):
-        with _get_conn(config.offline_store).raw_connection().cursor() as cur:
+        with get_conn(config.offline_store).raw_connection().cursor() as cur:
             cur.execute(f"CREATE TABLE {table_name} AS ({entity_df}) with data;")
 
     #     # If the entity_df is a string (SQL query), create a Postgres table out of it
@@ -398,8 +393,8 @@ def _upload_entity_df(
 
 
 def _get_entity_schema(
-    entity_df: Union[pd.DataFrame, str],
-    config: RepoConfig,
+        entity_df: Union[pd.DataFrame, str],
+        config: RepoConfig,
 ) -> Dict[str, np.dtype]:
     if isinstance(entity_df, pd.DataFrame):
         return dict(zip(entity_df.columns, entity_df.dtypes))
@@ -416,7 +411,7 @@ def get_query_schema(config: TeradataConfig, sql_query: str) -> Dict[str, np.dty
     We'll use the statement when we perform the query rather than copying data to a
     new table
     """
-    with _get_conn(config).connect() as conn:
+    with get_conn(config).connect() as conn:
         df = pd.read_sql(
             f"SELECT * FROM {sql_query}",
             conn,

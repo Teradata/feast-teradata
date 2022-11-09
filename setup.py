@@ -1,15 +1,16 @@
 from setuptools import find_packages, setup
 
-NAME = "feast-teradata"
-REQUIRES_PYTHON = ">=3.7.0"
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
 
 setup(
-    name=NAME,
+    name="feast-teradata",
     version="0.0.1",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    python_requires=REQUIRES_PYTHON,
+    python_requires=">=3.7",
     packages=find_packages(include=["feast_teradata"]),
-    install_requires=["feast==0.26.0"],
+    install_requires=required,
+    tests_require=['pytest==6.2.4'],
     license="Apache",
 )
