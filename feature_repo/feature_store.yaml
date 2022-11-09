@@ -7,7 +7,7 @@ online_store:
 offline_store:
     type: feast_teradata.teradata.TeradataOfflineStore
     host: tdprd.td.teradata.com
-    database: mw255040
-    user: mw255040
-    password: "Type your password"
+    database: mm255210
+    user: mm255210
+    password: "Passoword here"
     log_mech: LDAP

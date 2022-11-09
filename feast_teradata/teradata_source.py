@@ -2,6 +2,7 @@ import json
 from typing import Callable, Dict, Iterable, Optional, Tuple
 from pydantic import StrictStr
 from typeguard import typechecked
+import pyarrow as pa
 
 from feast.data_source import DataSource
 from feast.errors import DataSourceNoNameException
@@ -24,7 +25,7 @@ copy_to_sql,
 BIGINT, TIMESTAMP,
 fastload
 )
-#from teradataml.dataframe.fastload import fastload
+
 @typechecked
 class TeradataSource(DataSource):
     def __init__(
@@ -134,16 +135,6 @@ class TeradataSource(DataSource):
         self, config: RepoConfig
     ) -> Iterable[Tuple[str, str]]:
 
-        #with _get_conn(config.offline_store) as conn, conn.cursor() as cur:
-        #    cur.execute(
-        #        f"SELECT * FROM ({self.get_table_query_string()}) AS sub LIMIT 0"
-        #    )
-        #    return (
-        #        (c.name, pg_type_code_to_pg_type(c.type_code)) for c in cur.description
-        #    )
-
-        #conn = _get_conn(config.offline_store)
-
         # use the types as defined in feast.type_map
         from feast.type_map import pg_type_code_to_pg_type, pg_type_to_feast_value_type
         return [("col1", "NUMBER32"),
@@ -218,20 +209,11 @@ class TeradataConfig(FeastConfigBaseModel):
     log_mech: Optional[StrictStr] = "LDAP"
 
 
-# def _get_conn(config: TeradataConfig):
-#     # TODO: return a teradatasql connection/sqlalchemy engine
-#     eng = create_context(host=config.host, username=config.user, password=config.password, database=config.user,
-#                          logmech=config.log_mech)
-#     conn = eng.connect()
-#     return conn
-#
-
 def _get_conn(config: TeradataConfig):
     if get_context() is None:
         create_context(host=config.host, username=config.user, password=config.password, database=config.user,
                        logmech=config.log_mech)
     return get_context()
-
 
 
 def df_to_teradata_table(
@@ -244,9 +226,18 @@ def df_to_teradata_table(
     with _get_conn(config).connect() as conn:
 
         col_type_dict = dict(zip(df.columns, df.dtypes))
-        print(df.dtypes)
         fastload(df=df,
                     table_name=table_name,
                     if_exists="fail")
 
         return col_type_dict
+
+
+def teradata_type_to_feast_value_type(data_type):
+    type_map: Dict[str, ValueType] = {
+        "<class 'int'>": pa.int64(),
+        "<class 'float'>": pa.float64(),
+        "<class 'datetime.datetime'>": pa.timestamp('ns')  # TODO: Add more mappings here
+    }
+
+    return type_map[str(data_type)]
