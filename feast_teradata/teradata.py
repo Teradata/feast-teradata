@@ -35,6 +35,7 @@ from feast.infra.registry.registry import Registry
 from feast_teradata.teradata_source import (
     _get_conn,
     SavedDatasetTeradataStorage,
+    teradata_type_to_feast_value_type,
     TeradataConfig
 )
 from feast.on_demand_feature_view import OnDemandFeatureView
@@ -139,8 +140,6 @@ class TeradataOfflineStore(OfflineStore):
         @contextlib.contextmanager
         def query_generator() -> Iterator[str]:
             table_name = offline_utils.get_temp_entity_table_name()
-
-            print(entity_df.dtypes)
 
             _upload_entity_df(config, entity_df, table_name)
 
@@ -273,38 +272,27 @@ class TeradataRetrievalJob(RetrievalJob):
         with self._query_generator() as query:
             return query
 
-    def teradata_type_converter(self, code):
-        type_dict = {8: ValueType.INT64, 3072: Float64}
-        return(type_dict[code])
-
     def _to_arrow_internal(self) -> pa.Table:
         with self._query_generator() as query:
             with _get_conn(self.config.offline_store).raw_connection().cursor() as cur:
-            #cur = con.raw_connection().cursor()
-            # con.connect().set_session(readonly=True)
                 cur.execute(query)
                 fields = [
-                    (c[0], c[1])
+                    (c[0], teradata_type_to_feast_value_type(c[1]))
                     for c in cur.description
                 ]
-                column_names = [i[0] for i in fields]
                 data = cur.fetchall()
-                df = pd.DataFrame(data, columns=column_names)
-            # df.to_csv('abc.csv')
-            # schema = pa.schema(fields)
-            # TODO: Fix...
+                schema = pa.schema(fields)
 
-            # data_transposed: List[List[Any]] = []
-            # for col in range(len(fields)):
-            #     data_transposed.append([])
-            #     for row in range(len(data)):
-            #         data_transposed[col].append(data[row][col])
-            # schema = pa.schema(fields)
-            # table = pa.Table.from_arrays(
-            #     [pa.array(row) for row in data_transposed], schema=schema
-            # )
+                data_transposed: List[List[Any]] = []
+                for col in range(len(fields)):
+                    data_transposed.append([])
+                    for row in range(len(data)):
+                        data_transposed[col].append(data[row][col])
+                table = pa.Table.from_arrays(
+                    [pa.array(row) for row in data_transposed], schema=schema
+                )
 
-            return df # table
+            return table
 
     @property
     def metadata(self) -> Optional[RetrievalMetadata]:

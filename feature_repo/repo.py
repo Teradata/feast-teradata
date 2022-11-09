@@ -8,7 +8,7 @@ from feast_teradata.teradata import TeradataSource
 
 flower_stats = TeradataSource(
     name="Iris_d_p",
-    query="SELECT * FROM mw255040.iris_data",
+    query="SELECT * FROM mm255210.iris_data",
     timestamp_field="event_timestamp"
 )
 
