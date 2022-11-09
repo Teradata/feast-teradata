@@ -16,7 +16,7 @@ flower = Entity(name="flower", join_keys=["flower_id"])
 
 df_feature_view = FeatureView(
     name="df_feature_view",
-    ttl=timedelta(days=3),
+    ttl=timedelta(days=365),
     entities=[flower],
     schema=[
         Field(name="sepal length (cm)", dtype=Float64),
