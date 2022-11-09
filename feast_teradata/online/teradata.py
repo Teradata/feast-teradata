@@ -2,58 +2,27 @@ from datetime import datetime
 from typing import Sequence, Union, List, Optional, Tuple, Dict, Callable, Any
 
 import pytz
-import itertools
-from binascii import hexlify
-from collections import defaultdict
 from feast.usage import log_exceptions_and_usage
-from feast import RepoConfig,FeatureView, Entity
+from feast import RepoConfig, FeatureView, Entity
 from feast.infra.key_encoding_utils import serialize_entity_key
 from feast.infra.online_stores.online_store import OnlineStore
 from feast.protos.feast.types.EntityKey_pb2 import EntityKey as EntityKeyProto
 from feast.protos.feast.types.Value_pb2 import Value as ValueProto
-
-from feast.repo_config import FeastConfigBaseModel
-from pydantic import StrictStr
 from pydantic.typing import Literal
-from teradataml import (
-create_context,
-get_context,
-get_connection,
-copy_to_sql,
-BIGINT, TIMESTAMP,
-fastload
-)
 from feast.utils import to_naive_utc
-class TeradataConfig(FeastConfigBaseModel):
-    host: StrictStr
-    port: int = 1025
-    database: StrictStr
-    user: StrictStr
-    password: StrictStr
-    log_mech: Optional[StrictStr] = "LDAP"
+from feast_teradata.teradata_utils import (
+    get_conn,
+    TeradataConfig
+)
 
 
 class TeradataOnlineStoreConfig(TeradataConfig):
-    """
-    Configuration for the MySQL online store.
-    NOTE: The class *must* end with the `OnlineStoreConfig` suffix.
-    """
     type: Literal[
-        "Feast_teradata_online_Store.teradata.TeradataOnlineStore"
-    ] = "Feast_teradata_online_Store.teradata.TeradataOnlineStore"
+        "feast_teradata.online.teradata.TeradataOnlineStore"
+    ] = "feast_teradata.online.teradata.TeradataOnlineStore"
 
 
 class TeradataOnlineStore(OnlineStore):
-
-    def _get_conn(self, config: RepoConfig):
-
-        online_store_config = config.online_store
-        assert isinstance(online_store_config, TeradataOnlineStoreConfig)
-
-        if get_context() is None:
-            create_context(host=online_store_config.host, username=online_store_config.user, password=online_store_config.password, database=online_store_config.user,
-                           logmech=online_store_config.log_mech)
-        return get_context()
 
     @log_exceptions_and_usage(online_store="teradata")
     def online_write_batch(
@@ -67,15 +36,12 @@ class TeradataOnlineStore(OnlineStore):
             progress: Optional[Callable[[int], Any]],
     ) -> None:
 
-        conn = self._get_conn(config).raw_connection().cursor()
-
-        project = config.project
-
-        with conn: #todo
+        with get_conn(config.online_store).connect() as conn:
             for entity_key, values, timestamp, created_ts in data:
                 print(entity_key)
                 print("------------")
                 print(config.entity_key_serialization_version)
+
                 entity_key_bin = serialize_entity_key(
                     entity_key,
                     entity_key_serialization_version=config.entity_key_serialization_version,
@@ -87,10 +53,10 @@ class TeradataOnlineStore(OnlineStore):
                 for feature_name, val in values.items():
                     conn.execute(
                         f"""
-                                    UPDATE {_table_id(project, table)}
-                                    SET value = ?, event_ts = ?, created_ts = ?
-                                    WHERE (entity_key = ? AND feature_name = ?)
-                                """,
+                            UPDATE {_table_id(config.project, table)}
+                            SET value = ?, event_ts = ?, created_ts = ?
+                            WHERE (entity_key = ? AND feature_name = ?)
+                        """,
                         (
                             # SET
                             val.SerializeToString(),
@@ -103,7 +69,7 @@ class TeradataOnlineStore(OnlineStore):
                     )
 
                     conn.execute(
-                        f"""INSERT OR IGNORE INTO {_table_id(project, table)}
+                        f"""INSERT OR IGNORE INTO {_table_id(config.project, table)}
                                     (entity_key, feature_name, value, event_ts, created_ts)
                                     VALUES (?, ?, ?, ?, ?)""",
                         (
@@ -155,34 +121,39 @@ class TeradataOnlineStore(OnlineStore):
             entity_keys: List[EntityKeyProto],
             requested_features: Optional[List[str]] = None,
     ) -> List[Tuple[Optional[datetime], Optional[Dict[str, ValueProto]]]]:
-        cur = self._get_conn(config).raw_connection().cursor()
 
-        result: List[Tuple[Optional[datetime], Optional[Dict[str, ValueProto]]]] = []
+        with get_conn(config.online_store).raw_connection().cursor() as cur:
 
-        project = config.project
-        for entity_key in entity_keys:
-            entity_key_bin = serialize_entity_key(entity_key).hex()
+            result: List[Tuple[Optional[datetime], Optional[Dict[str, ValueProto]]]] = []
 
-            query = f"SELECT feature_name, \'value\', event_ts FROM {_table_id(project, table)} WHERE entity_key = \'{entity_key_bin}\'"
-            print(query)
+            project = config.project
+            for entity_key in entity_keys:
+                entity_key_bin = serialize_entity_key(entity_key).hex()
 
-            cur.execute(
-                query
-            )
+                query = f"""
+                SELECT feature_name, 'value', event_ts 
+                        FROM {_table_id(project, table)} 
+                        WHERE entity_key = '{entity_key_bin}'
+                """
+                print(query)
 
-            res = {}
-            res_ts = None
-            for feature_name, val_bin, ts in cur.fetchall():
-                val = ValueProto()
-                val.ParseFromString(val_bin)
-                res[feature_name] = val
-                res_ts = ts
+                cur.execute(
+                    query
+                )
 
-            if not res:
-                result.append((None, None))
-            else:
-                result.append((res_ts, res))
-        return result
+                res = {}
+                res_ts = None
+                for feature_name, val_bin, ts in cur.fetchall():
+                    val = ValueProto()
+                    val.ParseFromString(val_bin)
+                    res[feature_name] = val
+                    res_ts = ts
+
+                if not res:
+                    result.append((None, None))
+                else:
+                    result.append((res_ts, res))
+            return result
 
     def update(
             self,
@@ -193,27 +164,26 @@ class TeradataOnlineStore(OnlineStore):
             entities_to_keep: Sequence[Entity],
             partial: bool,
     ):
-        conn = self._get_conn(config).connect()
-        cur = self._get_conn(config).raw_connection().cursor()
 
-        project = config.project
+        with get_conn(config.online_store).connect() as conn:
+            project = config.project
 
-        # We don't create any special state for the entites in this implementation.
+            # We don't create any special state for the entites in this implementation.
+            for table in tables_to_keep:
+                print(_table_id(project, table))
+                # TODO discuss with TD data modelling expert
+                conn.execute(
+                    f"""CREATE TABLE {_table_id(project, table)} (
+                        entity_key VARCHAR(512), 
+                        feature_name VARCHAR(256), 
+                        "value" BLOB, 
+                        event_ts timestamp, 
+                        created_ts timestamp
+                    )"""
+                )
 
-        for table in tables_to_keep:
-            print(_table_id(project, table))
-            cur.execute(
-                f"CREATE TABLE {_table_id(project, table)} (entity_key VARCHAR(512), feature_name VARCHAR(256), \"value\" BLOB, event_ts timestamp, created_ts timestamp)"
-            )
-            # cur.execute(
-            #     f"CREATE INDEX {_table_id(project, table)}_ek (entity_key) ON {_table_id(project, table)};"
-            # )
-
-        for table in tables_to_delete:
-            # cur.execute(
-            #     f"DROP INDEX {_table_id(project, table)}_ek ON {_table_id(project, table)};"
-            # )
-            cur.execute(f"DROP TABLE {_table_id(project, table)}")
+            for table in tables_to_delete:
+                conn.execute(f"DROP TABLE {_table_id(project, table)}")
 
     def teardown(
             self,
@@ -221,16 +191,12 @@ class TeradataOnlineStore(OnlineStore):
             tables: Sequence[FeatureView],
             entities: Sequence[Entity],
     ):
-        conn = self._get_conn(config).connect()
-        cur = conn.raw_connection().cursor()
-        project = config.project
+        with get_conn(config.online_store).connect() as conn:
+            project = config.project
 
-        for table in tables:
-            cur.execute(
-                f"DROP INDEX {_table_id(project, table)}_ek ON {_table_id(project, table)};"
-            )
-            cur.execute(f"DROP TABLE {_table_id(project, table)}")
-
+            for table in tables:
+                # TODO confirm if any special syntax required to drop any associated indexes
+                conn.execute(f"DROP TABLE {_table_id(project, table)}")
 
 
 def _to_naive_utc(ts: datetime):
@@ -239,7 +205,6 @@ def _to_naive_utc(ts: datetime):
     else:
         return ts.astimezone(pytz.utc).replace(tzinfo=None)
 
+
 def _table_id(project: str, table: FeatureView) -> str:
     return f"{project}_{table.name}"
-
-

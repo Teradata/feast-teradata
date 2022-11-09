@@ -1,14 +1,11 @@
 from datetime import timedelta
-
-from feast import Entity, Field, FeatureView, ValueType
+from feast import Entity, Field, FeatureView
 from feast.types import Float64
-
-
-from feast_teradata.teradata import TeradataSource
+from feast_teradata.offline.teradata_source import TeradataSource
 
 flower_stats = TeradataSource(
     name="Iris_d_p",
-    query="SELECT * FROM mm255210.iris_data",
+    query="SELECT * FROM iris_data",
     timestamp_field="event_timestamp"
 )
 

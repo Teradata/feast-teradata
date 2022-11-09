@@ -1,8 +1,6 @@
 import json
 from typing import Callable, Dict, Iterable, Optional, Tuple
-from pydantic import StrictStr
 from typeguard import typechecked
-import pyarrow as pa
 
 from feast.data_source import DataSource
 from feast.errors import DataSourceNoNameException
@@ -11,34 +9,33 @@ from feast.protos.feast.core.SavedDataset_pb2 import (
     SavedDatasetStorage as SavedDatasetStorageProto,
 )
 from feast.repo_config import RepoConfig
-from feast.repo_config import FeastConfigBaseModel
 from feast.saved_dataset import SavedDatasetStorage
 from feast.value_type import ValueType
-from teradataml import create_context
 import pandas as pd
 import numpy as np
 from teradataml import (
-create_context,
-get_context,
-get_connection,
-copy_to_sql,
-BIGINT, TIMESTAMP,
-fastload
+    fastload
 )
+
+from feast_teradata.teradata_utils import (
+    get_conn,
+    TeradataConfig
+)
+
 
 @typechecked
 class TeradataSource(DataSource):
     def __init__(
-        self,
-        name: Optional[str] = None,
-        query: Optional[str] = None,
-        table: Optional[str] = None,
-        timestamp_field: Optional[str] = "",
-        created_timestamp_column: Optional[str] = "",
-        field_mapping: Optional[Dict[str, str]] = None,
-        description: Optional[str] = "",
-        tags: Optional[Dict[str, str]] = None,
-        owner: Optional[str] = "",
+            self,
+            name: Optional[str] = None,
+            query: Optional[str] = None,
+            table: Optional[str] = None,
+            timestamp_field: Optional[str] = "",
+            created_timestamp_column: Optional[str] = "",
+            field_mapping: Optional[Dict[str, str]] = None,
+            description: Optional[str] = "",
+            tags: Optional[Dict[str, str]] = None,
+            owner: Optional[str] = "",
     ):
         self._teradata_options = TeradataOptions(name=name, query=query, table=table)
 
@@ -132,11 +129,10 @@ class TeradataSource(DataSource):
         return type_map
 
     def get_table_column_names_and_types(
-        self, config: RepoConfig
+            self, config: RepoConfig
     ) -> Iterable[Tuple[str, str]]:
 
         # use the types as defined in feast.type_map
-        from feast.type_map import pg_type_code_to_pg_type, pg_type_to_feast_value_type
         return [("col1", "NUMBER32"),
                 ("col2", "DOUBLE"),
                 ("col3", "DOUBLE")]
@@ -150,10 +146,10 @@ class TeradataSource(DataSource):
 
 class TeradataOptions:
     def __init__(
-        self,
-        name: Optional[str],
-        query: Optional[str],
-        table: Optional[str],
+            self,
+            name: Optional[str],
+            query: Optional[str],
+            table: Optional[str],
     ):
         self._name = name or ""
         self._query = query or ""
@@ -200,44 +196,17 @@ class SavedDatasetTeradataStorage(SavedDatasetStorage):
         return TeradataSource(table=self.teradata_options._table)
 
 
-class TeradataConfig(FeastConfigBaseModel):
-    host: StrictStr
-    port: int = 1025
-    database: StrictStr
-    user: StrictStr
-    password: StrictStr
-    log_mech: Optional[StrictStr] = "LDAP"
-
-
-def _get_conn(config: TeradataConfig):
-    if get_context() is None:
-        create_context(host=config.host, username=config.user, password=config.password, database=config.user,
-                       logmech=config.log_mech)
-    return get_context()
-
-
-def df_to_teradata_table(
-        config: TeradataConfig, df: pd.DataFrame, table_name: str
-) -> Dict[str, np.dtype]:
+def df_to_teradata_table(config: TeradataConfig, df: pd.DataFrame, table_name: str) -> Dict[str, np.dtype]:
     """
     Create a table for the data frame, insert all the values, and return the table schema
     """
 
-    with _get_conn(config).connect() as conn:
-
+    with get_conn(config).connect() as conn:
         col_type_dict = dict(zip(df.columns, df.dtypes))
         fastload(df=df,
-                    table_name=table_name,
-                    if_exists="fail")
+                 table_name=table_name,
+                 if_exists="fail")
 
         return col_type_dict
 
 
-def teradata_type_to_feast_value_type(data_type):
-    type_map: Dict[str, ValueType] = {
-        "<class 'int'>": pa.int64(),
-        "<class 'float'>": pa.float64(),
-        "<class 'datetime.datetime'>": pa.timestamp('ns')  # TODO: Add more mappings here
-    }
-
-    return type_map[str(data_type)]

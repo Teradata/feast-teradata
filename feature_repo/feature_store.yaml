@@ -2,14 +2,14 @@ project: repo
 registry: registry.db
 provider: local
 online_store:
-    type: Feast_teradata_online_Store.teradata.TeradataOnlineStore
+    type: feast_teradata.online.teradata.TeradataOnlineStore
     host: tdprd.td.teradata.com
     database: mw255040
     user: mw255040
     password: Type Your password
     log_mech: LDAP
 offline_store:
-    type: feast_teradata.teradata.TeradataOfflineStore
+    type: feast_teradata.offline.teradata.TeradataOfflineStore
     host: tdprd.td.teradata.com
     database: mw255040
     user: mw255040
