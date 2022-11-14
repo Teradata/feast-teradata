@@ -1,7 +1,9 @@
 from datetime import datetime
-from typing import Sequence, Union, List, Optional, Tuple, Dict, Callable, Any
+from typing import Sequence, List, Optional, Tuple, Dict, Callable, Any
 
 import pytz
+import itertools
+from binascii import hexlify
 from feast.usage import log_exceptions_and_usage
 from feast import RepoConfig, FeatureView, Entity
 from feast.infra.key_encoding_utils import serialize_entity_key
@@ -9,11 +11,28 @@ from feast.infra.online_stores.online_store import OnlineStore
 from feast.protos.feast.types.EntityKey_pb2 import EntityKey as EntityKeyProto
 from feast.protos.feast.types.Value_pb2 import Value as ValueProto
 from pydantic.typing import Literal
+import pandas as pd
 from feast.utils import to_naive_utc
 from feast_teradata.teradata_utils import (
     get_conn,
     TeradataConfig
 )
+from teradataml import (
+    copy_to_sql,
+    VARBYTE,
+    VARCHAR,
+    TIMESTAMP,
+    DataFrame
+)
+
+types_dict = {
+    "entity_feature_key": VARBYTE(512),
+    "entity_key": VARBYTE(512),
+    "feature_name": VARCHAR(512),
+    "value": VARBYTE(1024),
+    "event_ts": TIMESTAMP,
+    "created_ts": TIMESTAMP
+}
 
 
 class TeradataOnlineStoreConfig(TeradataConfig):
@@ -26,7 +45,6 @@ class TeradataOnlineStore(OnlineStore):
 
     @log_exceptions_and_usage(online_store="teradata")
     def online_write_batch(
-
             self,
             config: RepoConfig,
             table: FeatureView,
@@ -35,126 +53,130 @@ class TeradataOnlineStore(OnlineStore):
             ],
             progress: Optional[Callable[[int], Any]],
     ) -> None:
+        assert isinstance(config.online_store, TeradataOnlineStoreConfig)
 
-        with get_conn(config.online_store).connect() as conn:
-            for entity_key, values, timestamp, created_ts in data:
-                print(entity_key)
-                print("------------")
-                print(config.entity_key_serialization_version)
+        dfs = [None] * len(data)
+        for i, (entity_key, values, timestamp, created_ts) in enumerate(data):
+            df = pd.DataFrame(
+                columns=[
+                    "entity_feature_key",
+                    "entity_key",
+                    "feature_name",
+                    "value",
+                    "event_ts",
+                    "created_ts",
+                ],
+                index=range(0, len(values)),
+            )
 
-                entity_key_bin = serialize_entity_key(
+            timestamp = to_naive_utc(timestamp)
+            if created_ts is not None:
+                created_ts = to_naive_utc(created_ts)
+
+            for j, (feature_name, val) in enumerate(values.items()):
+                df.loc[j, "entity_feature_key"] = serialize_entity_key(
+                    entity_key,
+                    entity_key_serialization_version=config.entity_key_serialization_version,
+                ) + bytes(feature_name, encoding="utf-8")
+                df.loc[j, "entity_key"] = serialize_entity_key(
                     entity_key,
                     entity_key_serialization_version=config.entity_key_serialization_version,
                 )
-                timestamp = to_naive_utc(timestamp)
-                if created_ts is not None:
-                    created_ts = to_naive_utc(created_ts)
+                df.loc[j, "feature_name"] = feature_name
+                df.loc[j, "value"] = val.SerializeToString()
+                df.loc[j, "event_ts"] = timestamp
+                df.loc[j, "created_ts"] = created_ts
 
-                for feature_name, val in values.items():
-                    conn.execute(
-                        f"""
-                            UPDATE {_table_id(config.project, table)}
-                            SET value = ?, event_ts = ?, created_ts = ?
-                            WHERE (entity_key = ? AND feature_name = ?)
-                        """,
-                        (
-                            # SET
-                            val.SerializeToString(),
-                            timestamp,
-                            created_ts,
-                            # WHERE
-                            entity_key_bin,
-                            feature_name,
-                        ),
-                    )
+            dfs[i] = df
 
-                    conn.execute(
-                        f"""INSERT OR IGNORE INTO {_table_id(config.project, table)}
-                                    (entity_key, feature_name, value, event_ts, created_ts)
-                                    VALUES (?, ?, ?, ?, ?)""",
-                        (
-                            entity_key_bin,
-                            feature_name,
-                            val.SerializeToString(),
-                            timestamp,
-                            created_ts,
-                        ),
-                    )
-                if progress:
-                    progress(1)
+        if dfs:
+            agg_df = pd.concat(dfs)
 
-    @staticmethod
-    def write_to_table(created_ts, cur, entity_key_bin, feature_name, project, table, timestamp, val):
-        cur.execute(
-            f"""
-                        UPDATE {_table_id(project, table)}
-                        SET value = %s, event_ts = %s, created_ts = %s
-                        WHERE (entity_key = %s AND feature_name = %s)
-                    """,
-            (
-                # SET
-                val.SerializeToString(),
-                timestamp,
-                created_ts,
-                # WHERE
-                entity_key_bin,
-                feature_name,
-            ),
-        )
-        cur.execute(
-            f"""INSERT INTO {_table_id(project, table)}
-                        (entity_key, feature_name, value, event_ts, created_ts)
-                        VALUES (%s, %s, %s, %s, %s)""",
-            (
-                entity_key_bin,
-                feature_name,
-                val.SerializeToString(),
-                timestamp,
-                created_ts,
-            ),
-        )
+            # This combines both the data upload plus the overwrite in the same transaction
+            with get_conn(config.online_store).connect() as conn:
+                copy_to_sql(df=agg_df,
+                            table_name=f"{config.project}_{table.name}_t",
+                            if_exists="replace",
+                            types=types_dict,
+                            primary_index="entity_feature_key")
 
+                query = f"""
+                        MERGE INTO {config.project}_{table.name} tar
+                        USING {config.project}_{table.name}_t src
+                           ON tar.entity_feature_key=src.entity_feature_key AND tar.entity_key = src.entity_key AND tar.feature_name = src.feature_name 
+                        WHEN MATCHED THEN
+                           UPDATE SET "value" = src."value", event_ts = src.event_ts, created_ts = src.created_ts
+                        WHEN NOT MATCHED THEN
+                               INSERT (entity_feature_key, entity_key, feature_name, "value", event_ts, created_ts) 
+                                   VALUES (src.entity_feature_key, src.entity_key, src.feature_name, src."value", src.event_ts, src.created_ts)
+                        """
+                conn.execute(query)
+
+            if progress:
+                progress(len(data))
+
+        return None
+
+    @log_exceptions_and_usage(online_store="teradata")
     def online_read(
             self,
             config: RepoConfig,
-            table: Union[FeatureView],
+            table: FeatureView,
             entity_keys: List[EntityKeyProto],
-            requested_features: Optional[List[str]] = None,
+            requested_features: List[str],
     ) -> List[Tuple[Optional[datetime], Optional[Dict[str, ValueProto]]]]:
+        assert isinstance(config.online_store, TeradataOnlineStoreConfig)
 
-        with get_conn(config.online_store).raw_connection().cursor() as cur:
+        result: List[Tuple[Optional[datetime], Optional[Dict[str, ValueProto]]]] = []
 
-            result: List[Tuple[Optional[datetime], Optional[Dict[str, ValueProto]]]] = []
-
-            project = config.project
-            for entity_key in entity_keys:
-                entity_key_bin = serialize_entity_key(entity_key).hex()
-
-                query = f"""
-                SELECT feature_name, 'value', event_ts 
-                        FROM {_table_id(project, table)} 
-                        WHERE entity_key = '{entity_key_bin}'
-                """
-                print(query)
-
-                cur.execute(
-                    query
+        entity_fetch_str = ",".join(
+            [
+                (
+                        "TO_BYTES("
+                        + hexlify(
+                            serialize_entity_key(
+                                combo[0],
+                                entity_key_serialization_version=config.entity_key_serialization_version,
+                            )
+                            + bytes(combo[1], encoding="utf-8")
+                        ).__str__()[1:]
+                        + ",'base16')"
                 )
+                for combo in itertools.product(entity_keys, requested_features)
+            ]
+        )
 
-                res = {}
-                res_ts = None
-                for feature_name, val_bin, ts in cur.fetchall():
-                    val = ValueProto()
-                    val.ParseFromString(val_bin)
-                    res[feature_name] = val
-                    res_ts = ts
+        with get_conn(config.online_store).connect() as conn:
+            query = f"""
+                    SELECT
+                        "entity_key", "feature_name", "value", "event_ts"
+                    FROM
+                        "{config.project}_{table.name}"
+                    WHERE
+                        "entity_feature_key" IN ({entity_fetch_str})
+                """
+            df = DataFrame.from_query(query).to_pandas()
 
-                if not res:
-                    result.append((None, None))
-                else:
-                    result.append((res_ts, res))
-            return result
+        for entity_key in entity_keys:
+            entity_key_bin = serialize_entity_key(
+                entity_key,
+                entity_key_serialization_version=config.entity_key_serialization_version,
+            )
+            res = {}
+            res_ts = None
+            for index, row in df[df["entity_key"] == entity_key_bin].iterrows():
+                val = ValueProto()
+                val.ParseFromString(row["value"])
+                res[row["feature_name"]] = val
+                res_ts = row["event_ts"].to_pydatetime()
 
+            if not res:
+                result.append((None, None))
+            else:
+                result.append((res_ts, res))
+        return result
+
+    @log_exceptions_and_usage(online_store="snowflake")
     def update(
             self,
             config: RepoConfig,
@@ -164,26 +186,25 @@ class TeradataOnlineStore(OnlineStore):
             entities_to_keep: Sequence[Entity],
             partial: bool,
     ):
+        assert isinstance(config.online_store, TeradataOnlineStoreConfig)
 
         with get_conn(config.online_store).connect() as conn:
-            project = config.project
-
-            # We don't create any special state for the entites in this implementation.
             for table in tables_to_keep:
-                print(_table_id(project, table))
-                # TODO discuss with TD data modelling expert
-                conn.execute(
-                    f"""CREATE TABLE {_table_id(project, table)} (
-                        entity_key VARCHAR(512), 
-                        feature_name VARCHAR(256), 
-                        "value" BLOB, 
-                        event_ts timestamp, 
-                        created_ts timestamp
-                    )"""
-                )
+                query = f"""
+                        CREATE TABLE {config.project}_{table.name} (
+                            "entity_feature_key" VARBYTE(512),
+                            "entity_key" VARBYTE(512),
+                            "feature_name" VARCHAR(512),
+                            "value" VARBYTE(1024),
+                            "event_ts" TIMESTAMP,
+                            "created_ts" TIMESTAMP
+                        )
+                    """
+                conn.execute(query)
 
             for table in tables_to_delete:
-                conn.execute(f"DROP TABLE {_table_id(project, table)}")
+                query = f"""DROP TABLE {config.project}_{table.name}"""
+                conn.execute(query)
 
     def teardown(
             self,
@@ -191,12 +212,12 @@ class TeradataOnlineStore(OnlineStore):
             tables: Sequence[FeatureView],
             entities: Sequence[Entity],
     ):
-        with get_conn(config.online_store).connect() as conn:
-            project = config.project
+        assert isinstance(config.online_store, TeradataOnlineStoreConfig)
 
+        with get_conn(config.online_store).connect() as conn:
             for table in tables:
-                # TODO confirm if any special syntax required to drop any associated indexes
-                conn.execute(f"DROP TABLE {_table_id(project, table)}")
+                query = f"""DROP TABLE {config.project}_{table.name}"""
+                conn.execute(query)
 
 
 def _to_naive_utc(ts: datetime):

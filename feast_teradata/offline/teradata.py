@@ -99,7 +99,6 @@ class TeradataOfflineStore(OfflineStore):
             WHERE _feast_row = 1
             """
 
-        print(query)
 
         return TeradataRetrievalJob(
             query=query,
@@ -177,7 +176,7 @@ class TeradataOfflineStore(OfflineStore):
             finally:
                 if table_name:
                     with get_conn(config.offline_store).connect() as conn:
-                        conn.execute(f"DROP TABLE {table_name};")
+                        conn.execute(f"DROP TABLE {table_name}")
 
         return TeradataRetrievalJob(
             query=query_generator,
@@ -384,7 +383,7 @@ def _upload_entity_df(
         df_to_teradata_table(config.offline_store, entity_df, table_name)
     elif isinstance(entity_df, str):
         with get_conn(config.offline_store).raw_connection().cursor() as cur:
-            cur.execute(f"CREATE TABLE {table_name} AS ({entity_df}) with data;")
+            cur.execute(f"CREATE TABLE {table_name} AS ({entity_df}) with data")
 
     #     # If the entity_df is a string (SQL query), create a Postgres table out of it
     #         cur.execute(f"CREATE TABLE {table_name} AS ({entity_df})")
@@ -438,7 +437,7 @@ WITH "entity_dataframe" AS (
                 {% for entity in featureview.entities %}
                     CAST("{{entity}}" AS VARCHAR(256)) ||
                 {% endfor %}
-                CAST("{{entity_df_event_timestamp_col}}" AS VARCHAR)
+                CAST("{{entity_df_event_timestamp_col}}" AS VARCHAR(256))
             ) AS "{{featureview.name}}__entity_row_unique_id"
             {% else %}
             ,CAST("{{entity_df_event_timestamp_col}}" AS VARCHAR(1000)) AS "{{featureview.name}}__entity_row_unique_id"
