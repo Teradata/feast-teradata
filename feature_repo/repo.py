@@ -1,10 +1,10 @@
 from datetime import timedelta
 from feast import Entity, Field, FeatureView
-from feast.types import Float64
+from feast.types import Float64, Int64
 from feast_teradata.offline.teradata_source import TeradataSource
 
 flower_stats = TeradataSource(
-    name="Iris_d_p",
+    name="iris_ds",
     query="SELECT * FROM iris_data",
     timestamp_field="event_timestamp"
 )
@@ -16,6 +16,7 @@ df_feature_view = FeatureView(
     ttl=timedelta(days=365),
     entities=[flower],
     schema=[
+        Field(name="flower_id", dtype=Int64),
         Field(name="sepal length (cm)", dtype=Float64),
         Field(name="sepal width (cm)", dtype=Float64),
         Field(name="petal length (cm)", dtype=Float64),

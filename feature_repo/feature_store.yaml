@@ -6,7 +6,7 @@ online_store:
     host: tdprd.td.teradata.com
     database: mw255040
     user: mw255040
-    password: Type Your password
+    password: Type your password
     log_mech: LDAP
 offline_store:
     type: feast_teradata.offline.teradata.TeradataOfflineStore
@@ -15,3 +15,4 @@ offline_store:
     user: mw255040
     password: Type your password
     log_mech: LDAP
+entity_key_serialization_version: 2

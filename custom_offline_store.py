@@ -42,6 +42,7 @@ def test_offline_pandas_df_as_entity_df():
 
 
 def test_online():
+
     fs.materialize_incremental(end_date=datetime.now())
 
     feature_vector = fs.get_online_features(
@@ -57,11 +58,12 @@ def test_online():
 
 
 fs = FeatureStore("feature_repo/")
-fs.apply([flower, df_feature_view])
+try:
+    fs.apply([flower, df_feature_view])
 
-test_online()
+    # test_offline_sql_as_entity_df()
 
-fs.teardown()
+    test_online()
 
-
-
+finally:
+    fs.teardown()
