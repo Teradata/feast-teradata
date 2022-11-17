@@ -489,14 +489,13 @@ of the data that is not relevant.
     SELECT
         "subquery".*,
         "entity_dataframe"."entity_timestamp",
-        "entity_dataframe"."{{featureview.name}}__entity_row_unique_id",
-        ("entity_dataframe"."entity_timestamp" - interval '{{ featureview.ttl//60 }}' minute) as low_limit
+        "entity_dataframe"."{{featureview.name}}__entity_row_unique_id"
     FROM "{{ featureview.name }}__subquery" AS "subquery"
     INNER JOIN "{{ featureview.name }}__entity_dataframe" AS "entity_dataframe"
     ON 1=1
         AND "subquery"."event_timestamp" <= "entity_dataframe"."entity_timestamp"
         {% if featureview.ttl == 0 %}{% else %}
-        AND subquery.event_timestamp >= low_limit
+        AND subquery.event_timestamp >= entity_dataframe.entity_timestamp - {{ featureview.ttl }} * interval '1' second
         {% endif %}
         {% for entity in featureview.entities %}
         AND "subquery"."{{ entity }}" = "entity_dataframe"."{{ entity }}"
