@@ -61,7 +61,7 @@ fs = FeatureStore("feature_repo/")
 try:
     fs.apply([flower, df_feature_view])
 
-    # test_offline_sql_as_entity_df()
+    test_offline_sql_as_entity_df()
 
     test_online()
 
