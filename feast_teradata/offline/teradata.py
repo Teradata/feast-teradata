@@ -495,7 +495,9 @@ of the data that is not relevant.
     ON 1=1
         AND "subquery"."event_timestamp" <= "entity_dataframe"."entity_timestamp"
         {% if featureview.ttl == 0 %}{% else %}
-        AND subquery.event_timestamp >= entity_dataframe.entity_timestamp - {{ featureview.ttl }} * interval '1' second
+        AND subquery.event_timestamp >= entity_dataframe.entity_timestamp - {{ featureview.ttl }} * interval '0 00:00:01' day to second /* 
+Uses TD specific function day to second to make sure any value for TTL works (up till 27 years converted to seconds). Takes an additional day parameter to convert the value to seconds
+ */
         {% endif %}
         {% for entity in featureview.entities %}
         AND "subquery"."{{ entity }}" = "entity_dataframe"."{{ entity }}"
