@@ -16,7 +16,7 @@ def test_offline_sql_as_entity_df():
             "df_feature_view:petal length (cm)",
             "df_feature_view:petal width (cm)"
         ]
-        )
+    )
     rs = rs.to_df()
     print(rs)
 
@@ -36,13 +36,12 @@ def test_offline_pandas_df_as_entity_df():
             "df_feature_view:petal length (cm)",
             "df_feature_view:petal width (cm)"
         ]
-        )
+    )
     rs = rs.to_df()
     print(rs)
 
 
 def test_online():
-
     fs.materialize_incremental(end_date=datetime.now())
 
     feature_vector = fs.get_online_features(
@@ -52,7 +51,7 @@ def test_online():
             "df_feature_view:petal length (cm)",
             "df_feature_view:petal width (cm)"
         ], entity_rows=[{"flower_id": 5}]
-        ).to_dict()
+    ).to_dict()
 
     print(feature_vector)
 
@@ -61,7 +60,15 @@ fs = FeatureStore("feature_repo/")
 try:
     fs.apply([flower, df_feature_view])
 
+    print("Test offline store as pandas entity df")
+
+    test_offline_pandas_df_as_entity_df()
+
+    print("Test offline store as sql string entity df")
+
     test_offline_sql_as_entity_df()
+
+    print("Test online store")
 
     test_online()
 

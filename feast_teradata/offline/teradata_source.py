@@ -203,9 +203,7 @@ def df_to_teradata_table(config: TeradataConfig, df: pd.DataFrame, table_name: s
 
     with get_conn(config).connect() as conn:
         col_type_dict = dict(zip(df.columns, df.dtypes))
-        fastload(df=df,
-                 table_name=table_name,
-                 if_exists="fail")
+        df.to_sql(name=table_name, con=conn, if_exists='replace', index=False)
 
         return col_type_dict
 
