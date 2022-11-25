@@ -1,0 +1,18 @@
+project: my_project
+registry: registry.db
+provider: local
+online_store:
+    type: feast_teradata.online.teradata.TeradataOnlineStore
+    host: Teradata host URL
+    database: Teradata database
+    user: Teradata user
+    password: Teradata password
+    log_mech: Teradata log_mech
+offline_store:
+    type: feast_teradata.offline.teradata.TeradataOfflineStore
+    host: Teradata host URL
+    database: Teradata database
+    user: Teradata user
+    password: Teradata password
+    log_mech: Teradata log_mech
+entity_key_serialization_version: 2
