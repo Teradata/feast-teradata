@@ -1,57 +1,201 @@
-Copyright (c) 2022 Teradata.  All rights reserved.
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
 
-LICENSE AGREEMENT
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
-PRODUCT: aoa
+   1. Definitions.
 
-IMPORTANT - READ THIS AGREEMENT CAREFULLY BEFORE INSTALLING OR USING THE SOFTWARE.  TERADATA WILL LICENSE THE SOFTWARE TO YOU ONLY IF YOU ACCEPT THE TERMS AND CONDITIONS OF THIS AGREEMENT AND MEET THE CONDITIONS FOR USING THE SOFTWARE DESCRIBED BELOW.  BY DOWNLOAING, INSTALLING OR USING THE SOFTWARE, YOU (1) AGREE TO THE TERMS AND CONDITIONS OF THIS AGREEMENT, AND (2) REPRESENT AND WARRANT THAT YOU POSSESS THE AUTHORITY TO ENTER INTO THIS AGREEMENT ON BEHALF OF YOU, YOUR EMPLOYER (WHEN ACTING ON BEHALF OF YOUR EMPLOYER), AND/OR A TERADATA-AUTHORIZED LICENSEE (WHEN YOU AND YOUR EMPLOYER ARE ACTING ON BEHALF OF A TERADATA-AUTHORIZED LICENSEE).  IF YOU DO NOT ACCEPT THE TERMS AND CONDITIONS OF THIS AGREEMENT, DO NOT DOWNLOAD, INSTALL OR USE THE SOFTWARE.
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
 
-IMPORTANT - BY DOWNLOADING THE SOFTWARE:
-*       YOU ACKNOWLEDGE THAT THE SOFTWARE YOU ARE DOWNLOADING FROM TERADATA IS SUBJECT TO THE
-        RESTRICTIONS AND CONTROLS IMPOSED BY UNITED STATES EXPORT REGULATIONS.
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
 
-*       YOU CERTIFY THAT:
-        **      YOU DO NOT INTEND TO USE THE SOFTWARE FOR ANY PURPOSE PROHIBITED BY UNITED STATES EXPORT                REGULATIONS, INCLUDING, WITHOUT LIMITATION, TERRORISM, CYBER-ATTACKS, CYBER-CRIMES,                                     MONEY-LAUNDERING, INDUSTRIAL ESPIONAGE, OR NUCLEAR, CHEMICAL OR BIOLOGICAL WEAPONS                              PROLIFERATION.
-        **      YOU ARE NOT LISTED AS A DENIED PARTY ON ANY LIST GOVERNING UNITED STATES EXPORTS.
-        **      YOU ARE NOT A NATIONAL OF ANY COUNTRY THAT IS NOT APPROVED FOR EXPORT OF THE SOFTWARE.                          AS OF 2017, THESE COUNTRIES ARE CUBA, IRAN, NORTH KOREA, AND SYRIA.
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
 
-This License Agreement ("Agreement") is a legal contract between you (as defined below) and Teradata (as defined below) regarding the Software (as defined below).  The terms "you", "your" and "yours" collectively and individually refer to you as an individual and to any company for which you are acting.  The term "Teradata" refers to either Teradata U.S., Inc. for Software deliveries in the US or Teradata Ireland Ltd. for Software deliveries outside the United States.  "Software" refers to the software product identified above, which consists of computer software code in object code form only, as well as associated documentation that Teradata may elect in its sole discretion to provide you. "Software" also includes any and all error corrections, bug fixes, updates, upgrades, or new versions or releases of the Software (collectively and individually, "Enhancements") that Teradata may elect in its sole discretion to provide you.
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
 
-1.  Term.  This Agreement commences on the earliest date of the first download, first copying, first installation, or first use of the Software (the "Effective Date"). Unless terminated earlier as provided herein, this agreement, including your license to the Software, will expire or terminate on the same date that your Teradata-authorized license to use the Teradata Vantage product expires or terminates (whichever occurs first).
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
 
-2.  License.
-(a)  Subject to your compliance with all of the terms and conditions of this Agreement and only during the term of this Agreement, Teradata grants you a nonexclusive, nontransferable, paid up license to install and use the Software on your computer solely for purposes of facilitating your Teradata-authorized license to use the Teradata Vantage.  You may make reasonable archival backup copies of the Software, but may only use an archival copy in lieu of your primary copy and subject to the same restrictions as your primary copy.
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
 
-(b)  The term Third Party Software means computer programs or modules (including their documentation) that bear the logo, copyright and/or trademark of a third party (including open source software that are contained in files marked as "open source" or the like) or are otherwise subject to the written license terms of a third party.  The term "Software" does not include Third Party Software.  Third Party Software is licensed to you subject to the applicable license terms accompanying it, included in/with it, referenced in it, or otherwise entered into by you with respect to it.  Third Party Software license terms include those found in the FOSS licensing zip file accompanying the Software.  Teradata provides source code to certain Third Party Software for certain periods of time in compliance with certain applicable licenses.  To request such source code, visit http://developer.teradata.com/download/license/oss-request.
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
 
-(c)  You will not sell, copy, rent, loan, modify, transfer, disclose, embed, sublicense, create derivative works of or distribute the Software, in whole or in part, without Teradata's prior written consent.  You are granted no rights to obtain or use the Software's source code.  You will not reverse-assemble, reverse compile or reverse-engineer the Software, except as expressly permitted by applicable law without the possibility of contractual waiver.  Notwithstanding anything to the contrary, you do not have any license, right, or authority to subject the Software, in whole or in part or as part of a larger work, to any terms of any other agreement, including GNU Public Licenses.
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
 
-(d)  No license rights to the Software will be implied.  The Software, which includes all copies thereof (whether in whole or in part), is and remains the exclusive property of Teradata.  You will ensure that all copies of the Software contain Teradata's copyright notices, as well as all other proprietary legends.  Teradata reserves the right to inspect your use of the Software for purposes of verifying your compliance with the terms and conditions of this Agreement.
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
 
-3.  Responsibilities.  You are responsible for the installation of the Software, as well as for providing data security and backup operations.  This Agreement does not require Teradata to provide you with any Enhancements, consulting services, technical assistance, installation, training, support, or maintenance of any kind (collectively and individually, "Services"). To the extent that Teradata elects to provide you with any Services, such Services are provided to you at Teradata's sole discretion and may be modified or discontinued at any time for any reason.
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
 
-4.  DISCLAIMER OF WARRANTY.  TERADATA: (a) PROVIDES SERVICES (IF ANY), (b) LICENSES THE SOFTWARE, AND (c) PROVIDES THIRD PARTY SOFTWARE TO YOU ON AN "AS-IS" BASIS WITHOUT WARRANTIES OF ANY KIND (ORAL OR WRITTEN, EXPRESS OR IMPLIED, OR STATUTORY). WITHOUT LIMITATION TO THE FOREGOING, THERE ARE NO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.  TERADATA DOES NOT WARRANT THAT THE SOFTWARE, THIRD PARTY SOFTWARE, OR SERVICES WILL MEET YOUR REQUIREMENTS OR CONFORM TO ANY SPECIFICATIONS, OR THAT THE OPERATION OF THE SOFTWARE OR THIRD PARTY SOFTWARE WILL BE UNINTERRUPTED OR ERROR FREE.  YOU BEAR THE ENTIRE RISK AS TO SATISFACTORY QUALITY, PERFORMANCE, ACCURACY, AND RESULTS OBTAINED FROM THE SOFTWARE, THIRD PARTY SOFTWARE, AND SERVICES.
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
 
-SOME JURISDICTIONS RESTRICT DISCLAIMERS OF WARRANTY, SO THE ABOVE DISCLAIMERS MAY NOT FULLY APPLY TO YOU.
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
 
-5.  LIMITATIONS ON LIABILITY: UNDER NO CIRCUMSTANCES WILL TERADATA'S AND ITS LICENSOR'S TOTAL CUMULATIVE LIABILITY FOR CLAIMS RELATING TO THIS AGREEMENT, THE SERVICES, THE SOFTWARE, AND/OR THIRD PARTY SOFTWARE (WHETHER BASED IN CONTRACT, STATUTE, TORT (INCLUDING NEGLIGENCE) OR OTHERWISE) EXCEED US$1,000; PROVIDED, HOWEVER, THAT THE FOREGOING WILL NOT APPLY TO CLAIMS FOR (A) PERSONAL INJURY, INCLUDING DEATH, TO THE EXTENT CAUSED BY TERADATA'S NEGLIGENCE OR WILLFUL MISCONDUCT; OR (B) PHYSICAL DAMAGE TO TANGIBLE REAL OR PERSONAL PROPERTY TO THE EXTENT CAUSED BY TERADATA'S NEGLIGENCE OR WILLFUL MISCONDUCT EQUAL TO THE AMOUNT OF DIRECT DAMAGES UP TO ONE MILLION DOLLARS PER OCCURRENCE.  IN NO EVENT WILL TERADATA OR ITS LICENSORS BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE, INCIDENTAL OR CONSEQUENTIAL DAMAGES, OR FOR LOSS OF PROFITS, REVENUE, TIME, OPPORTUNITY OR DATA, EVEN IF INFORMED OF THE POSSIBILITY OF SUCH DAMAGES.
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
 
-SOME JURISDICTIONS RESTRICT LIMITATIONS OF LIABILITY, SO THE ABOVE LIMITATIONS MAY NOT FULLY APPLY TO YOU.
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
 
-6.  Government Restrictions. You agree that you will not, directly or indirectly, export or transmit any Software without obtaining Teradata's prior written authorization, as well as appropriate governmental approvals, including those required by the U.S. Government.  Use and or distribution of this software is subject to export laws and regulations of the United States and other jurisdictions. The links below connect you to applicable U.S. government agencies, and their regulations, that have jurisdiction over this transaction.
-http://www.bis.doc.gov/
-http://www.treas.gov/offices/enforcement/ofac/
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
 
-In downloading this product, you acknowledge that this transaction is subject to applicable export control laws and you certify that your download, use and/or subsequent distribution of this product is not prohibited under applicable laws and regulations.
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
 
-The Government's use, duplication, or disclosure of Teradata's commercial computer software and commercial computer software documentation is subject to: (a) the Restricted Rights Notice set forth in 48 C.F.R. 52.227-14 (Rights In Data - General); (b) Teradata's standard commercial license rights supplemented by 48 C.F.R. 52.227-19 (Commercial Computer Software - Restricted Rights); and/or (c) the limited rights and license set forth 48 CFR 252.227-7015 (Technical Data-Commercial Items), as applicable.
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
 
-7.  Termination and Expiration. A party may terminate this Agreement with or without cause, upon providing written notice to the other parties.  When this Agreement terminates or expires, you will immediately cease all use of the Software, permanently remove the Software from all computers, destroy all copies of the Software, and (upon receipt of Teradata's request) provide a signed written certification that the foregoing has occurred.  Sections 4, 5, 6, 7, 8, 9, 10, and 11 will survive expiration or termination of this Agreement.
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
 
-8.  Choice of Law and Dispute Resolution. The parties will attempt in good faith to resolve any controversy or claim by negotiation or mediation.  If they are unable to do so, and regardless of the causes of action alleged and whether they arise under this Agreement or otherwise, the claim will be resolved by arbitration before a sole arbitrator in Dayton, Ohio pursuant to the then-current Commercial Rules of the American Arbitration Association and the federal substantive and procedural law of arbitration.  The arbitrator's award will be final and binding, and may be entered in any court having jurisdiction thereof, but may include only damages consistent with the limitations in this Agreement.  Each party will bear its own attorney's fees and costs related to the arbitration. The obligations to negotiate, mediate and arbitrate shall not apply to claims for misuse or infringement of a party's intellectual property rights.  Any claim or action must be brought within two years after the claimant knows or should have known of the claim.  New York law will govern the interpretation and enforcement of this Agreement, except that the Federal Arbitration Act will govern the interpretation and enforcement of the arbitrability of claims under this Section.
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
 
-9.  Feedback.  Notwithstanding anything to the contrary: (a) Teradata will have no obligation of any kind with respect to any Software-related comments, suggestions, design changes or improvements that you elect to provide to Teradata in either verbal or written form (collectively, "Software Feedback"), and (b) Teradata and its affiliates are hereby free to use any ideas, concepts, know-how or techniques, in whole or in part, contained in Software Feedback: (i) for any purpose whatsoever, including developing, manufacturing, and/or marketing products and/or services incorporating  Software Feedback in whole or in part, and (ii) without any restrictions or limitations, including requiring the payment of any license fees, royalties, or other consideration.
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
 
-10.  Confidentiality.  You will not disclose the results of any testing or evaluations, including any benchmarks, insofar as it relates to the Software without Teradata's prior written consent.
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
 
-11.  Entire Agreement. This Agreement constitutes the entire understanding of the parties with respect to the Software and Services, and supersede all other prior agreements and understandings whether oral or written.  No oral representation or change to this Agreement will be binding upon either party unless agreed to in writing and signed by authorized representatives of all parties.  You will not assign this Agreement or your rights, nor will you delegate your obligations under this Agreement.  Failure by either party to enforce any term or condition of this Agreement will not be deemed a waiver of future enforcement of that or any other term or condition.  The provisions of this Agreement are severable. "Include", "includes", and "including" shall be interpreted as introducing a list of examples which do not limit the generality of any preceding words or any words in the list of examples.
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
