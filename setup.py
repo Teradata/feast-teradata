@@ -12,5 +12,5 @@ setup(
     packages=find_packages(include=["feast_teradata"]),
     install_requires=required,
     tests_require=['pytest==6.2.4'],
-    license="Apache",
+    license="Teradata",
 )
