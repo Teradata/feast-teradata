@@ -12,7 +12,6 @@ from feast.data_source import PushMode
 
 def run_demo():
     store = FeatureStore(repo_path="./feature_repo")
-    print("\n--- Run feast apply to setup feature store on Teradata ---")
     command = "cd feature_repo; feast apply"
     subprocess.run(command, shell=True)
 
@@ -82,7 +81,7 @@ def fetch_historical_features_entity_sql(store: FeatureStore, for_batch_scoring)
         entity_sql = f"""
             SELECT
                 "driver_id",
-                CURRENT_TIMESTAMP() as "event_timestamp"
+                CURRENT_TIMESTAMP as "event_timestamp"
             FROM {store.get_data_source(table_name).get_table_query_string()}
             WHERE "event_timestamp" BETWEEN '{start_date}' AND '{end_date}'
             GROUP BY "driver_id"
@@ -106,7 +105,7 @@ def fetch_historical_features_entity_sql(store: FeatureStore, for_batch_scoring)
             "driver_hourly_stats:avg_daily_trips",
         ],
     ).to_df()
-    print(training_df.head())
+    print(training_df)
 
 
 def fetch_historical_features_entity_df(store: FeatureStore, for_batch_scoring: bool):
@@ -139,7 +138,7 @@ def fetch_historical_features_entity_df(store: FeatureStore, for_batch_scoring: 
             "driver_hourly_stats:avg_daily_trips",
         ],
     ).to_df()
-    print(training_df.head())
+    print(training_df)
 
 
 def fetch_online_features(store):

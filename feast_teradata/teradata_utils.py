@@ -31,6 +31,6 @@ def teradata_type_to_feast_value_type(data_type):
 
 def get_conn(config: TeradataConfig):
     if get_context() is None:
-        create_context(host=config.host, username=config.user, password=config.password, database=config.user,
+        create_context(host=config.host, username=config.user, password=config.password, database=config.database,
                        logmech=config.log_mech)
     return get_context()

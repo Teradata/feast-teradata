@@ -41,7 +41,7 @@ def init_repo(repo_name: str, template: str):
         sys.exit(1)
 
     # Copy template directory
-    template_path = str(Path(Path(__file__).parent / "Template" / template).absolute())
+    template_path = str(Path(Path(__file__).parent / "template" / template).absolute())
     # x
     copy_tree(template_path, str(repo_path))
 
@@ -58,7 +58,7 @@ def init_repo(repo_name: str, template: str):
         bootstrap.bootstrap()  # type: ignore
         os.remove(bootstrap_path)
 
-    # Template the feature_store.yaml file
+    # template the feature_store.yaml file
     feature_store_yaml_path = repo_path / "feature_repo" / "feature_store.yaml"
     replace_str_in_file(
         feature_store_yaml_path, "project: my_project", f"project: {repo_name}"
@@ -78,4 +78,4 @@ def init_repo(repo_name: str, template: str):
     click.echo()
 
 
-init_repo("test_td_temp", "teradata");
+init_repo("test_td", "teradata");
