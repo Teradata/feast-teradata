@@ -263,7 +263,7 @@ class TeradataRetrievalJob(RetrievalJob):
 
     def _to_df_internal(self) -> pd.DataFrame:
         # We use arrow format because it gives better control of the table schema
-        return self._to_arrow_internal()  # .to_pandas()
+        return self._to_arrow_internal().to_pandas()
 
     def to_sql(self) -> str:
         with self._query_generator() as query:
