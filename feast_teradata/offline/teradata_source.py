@@ -30,6 +30,7 @@ class TeradataSource(DataSource):
             name: Optional[str] = None,
             query: Optional[str] = None,
             table: Optional[str] = None,
+            database: Optional[str] = None,
             timestamp_field: Optional[str] = "",
             created_timestamp_column: Optional[str] = "",
             field_mapping: Optional[Dict[str, str]] = None,
@@ -37,7 +38,7 @@ class TeradataSource(DataSource):
             tags: Optional[Dict[str, str]] = None,
             owner: Optional[str] = "",
     ):
-        self._teradata_options = TeradataOptions(name=name, query=query, table=table)
+        self._teradata_options = TeradataOptions(name=name, query=query, database=database,table=table)
 
         # If no name, use the table as the default name.
         if name is None and table is None:
@@ -82,6 +83,7 @@ class TeradataSource(DataSource):
             name=teradata_options["name"],
             query=teradata_options["query"],
             table=teradata_options["table"],
+            database=teradata_options["database"],
             field_mapping=dict(data_source.field_mapping),
             timestamp_field=data_source.timestamp_field,
             created_timestamp_column=data_source.created_timestamp_column,
@@ -150,16 +152,18 @@ class TeradataOptions:
             name: Optional[str],
             query: Optional[str],
             table: Optional[str],
+            database: Optional[str]
     ):
         self._name = name or ""
         self._query = query or ""
         self._table = table or ""
+        self._database = database or ""
 
     @classmethod
     def from_proto(cls, teradata_options_proto: DataSourceProto.CustomSourceOptions):
         config = json.loads(teradata_options_proto.configuration.decode("utf8"))
         teradata_options = cls(
-            name=config["name"], query=config["query"], table=config["table"]
+            name=config["name"], query=config["query"], table=config["table"], database=["database"]
         )
 
         return teradata_options
@@ -167,7 +171,7 @@ class TeradataOptions:
     def to_proto(self) -> DataSourceProto.CustomSourceOptions:
         teradata_options_proto = DataSourceProto.CustomSourceOptions(
             configuration=json.dumps(
-                {"name": self._name, "query": self._query, "table": self._table}
+                {"name": self._name, "query": self._query, "table": self._table, "database": self._database}
             ).encode()
         )
         return teradata_options_proto
@@ -180,7 +184,7 @@ class SavedDatasetTeradataStorage(SavedDatasetStorage):
 
     def __init__(self, table_ref: str):
         self.teradata_options = TeradataOptions(
-            table=table_ref, name=None, query=None
+            table=table_ref, name=None, query=None, database=None
         )
 
     @staticmethod

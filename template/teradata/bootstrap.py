@@ -41,7 +41,7 @@ def bootstrap():
     config_file = repo_path / "feature_store.yaml"
     for i in range(2):
         replace_str_in_file(
-            config_file, "host", host
+            config_file, "Teradata host URL", host
         )
         replace_str_in_file(config_file, "Teradata user", teradata_user)
         replace_str_in_file(config_file, "Teradata password", teradata_password)
@@ -61,9 +61,8 @@ def bootstrap():
         teradata_conn = get_context().connect()
 
         with teradata_conn as conn:
-            copy_to_sql(df=driver_df,
-                        table_name=f"{project_name}_feast_driver_hourly_stats",
-                        if_exists="replace")
+            driver_df.to_sql(name=f"{project_name}_feast_driver_hourly_stats", con=conn, if_exists="replace",
+                             index=False)
 
 
 if __name__ == "__main__":
