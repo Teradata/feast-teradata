@@ -93,7 +93,7 @@ class TeradataOfflineStore(OfflineStore):
             FROM (
                 SELECT {a_field_string},
                 ROW_NUMBER() OVER({partition_by_join_key_string} ORDER BY {timestamp_desc_string}) AS _feast_row
-                FROM ({from_expression}) a
+                FROM {from_expression} a
                 WHERE a."{timestamp_field}" BETWEEN '{start_date}' AND '{end_date}'
             ) b
             WHERE _feast_row = 1
@@ -532,13 +532,15 @@ Thus we only need to compute the latest timestamp of each feature.
     (
         SELECT b.*,
             ROW_NUMBER() OVER(
-                PARTITION BY "{{featureview.name}}__entity_row_unique_id"
-                ORDER BY "event_timestamp" DESC{% if featureview.created_timestamp_column %},"created_timestamp" DESC{% endif %}
+                PARTITION BY b."{{featureview.name}}__entity_row_unique_id"
+                ORDER BY b."event_timestamp" DESC{% if featureview.created_timestamp_column %},b."created_timestamp" DESC{% endif %}
             ) AS "row_number"
         FROM "{{ featureview.name }}__base" b
         {% if featureview.created_timestamp_column %}
-            INNER JOIN "{{ featureview.name }}__dedup"
-            USING ("{{featureview.name}}__entity_row_unique_id", "event_timestamp", "created_timestamp")
+            INNER JOIN "{{ featureview.name }}__dedup" bb
+            ON b."{{featureview.name}}__entity_row_unique_id" = bb."{{featureview.name}}__entity_row_unique_id"
+            AND b."event_timestamp" = bb."event_timestamp"
+            AND b."created_timestamp" = bb."created_timestamp"
         {% endif %}
     ) as c
     WHERE "row_number" = 1

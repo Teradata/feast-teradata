@@ -46,6 +46,7 @@ driver_stats_fv = FeatureView(
     # for both materialization of features into a store, and are used as references
     # during retrieval for building a training dataset or serving features
     schema=[
+        Field(name="driver_id", dtype=Int64),
         Field(name="conv_rate", dtype=Float64),
         Field(name="acc_rate", dtype=Float64),
         Field(name="avg_daily_trips", dtype=Int64),
