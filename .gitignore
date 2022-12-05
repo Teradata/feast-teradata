@@ -3,6 +3,9 @@
 **__pycache__
 .direnv
 .envrc
+feast_teradata.egg-info/
+build/
+dist/
 feature_repo/online_store.db
 feature_repo/registry.db
 output

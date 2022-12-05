@@ -34,7 +34,7 @@ def get_conn(config: TeradataConfig):
         create_context(host=config.host,
                        username=config.user,
                        password=config.password,
-                       database=config.user,
+                       database=config.database,
                        logmech=config.log_mech)
 
     return get_context()
