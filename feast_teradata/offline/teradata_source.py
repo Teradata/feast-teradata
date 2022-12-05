@@ -96,7 +96,7 @@ class TeradataSource(DataSource):
         data_source_proto = DataSourceProto(
             name=self.name,
             type=DataSourceProto.CUSTOM_SOURCE,
-            data_source_class_type="feast-teradata.teradata_source.TeradataSource",
+            data_source_class_type="feast_teradata.offline.teradata_source.TeradataSource",
             field_mapping=self.field_mapping,
             custom_options=self._teradata_options.to_proto(),
             description=self.description,
