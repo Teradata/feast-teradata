@@ -39,6 +39,8 @@ def bootstrap():
     teradata_database = click.prompt("Teradata Database Name:")
     teradata_log_mech = click.prompt("Teradata Connection Mechanism:")
     config_file = repo_path / "feature_store.yaml"
+    path = 'teradatasql://'+ teradata_user +':' + teradata_password + '@'+host + '/?database=' + teradata_database + '&LOGMECH=' + teradata_log_mech
+    replace_str_in_file(config_file, "Teradata registry path", path)
     for i in range(2):
         replace_str_in_file(
             config_file, "Teradata host URL", host

@@ -1,5 +1,7 @@
 project: my_project
-registry: registry.db
+registry:
+    registry_type: sql
+    path: Teradata registry path
 provider: local
 online_store:
     type: feast_teradata.online.teradata.TeradataOnlineStore

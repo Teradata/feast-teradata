@@ -53,10 +53,10 @@ def run_demo():
         }
     )
     print(event_df)
-    store.push("driver_stats_push_source", event_df, to=PushMode.ONLINE_AND_OFFLINE)
-
-    print("\n--- Online features again with updated values from a stream push ---")
-    fetch_online_features(store, source="push")
+    # store.push("driver_stats_push_source", event_df, to=PushMode.ONLINE_AND_OFFLINE)
+    #
+    # print("\n--- Online features again with updated values from a stream push ---")
+    # fetch_online_features(store, source="push")
 
     print("\n--- Run feast teardown ---")
     command = "cd feature_repo; feast teardown"
