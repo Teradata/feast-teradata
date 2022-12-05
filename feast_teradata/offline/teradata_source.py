@@ -13,9 +13,6 @@ from feast.saved_dataset import SavedDatasetStorage
 from feast.value_type import ValueType
 import pandas as pd
 import numpy as np
-from teradataml import (
-    fastload
-)
 
 from feast_teradata.teradata_utils import (
     get_conn,
@@ -38,7 +35,10 @@ class TeradataSource(DataSource):
             tags: Optional[Dict[str, str]] = None,
             owner: Optional[str] = "",
     ):
-        self._teradata_options = TeradataOptions(name=name, query=query, database=database,table=table)
+        self._teradata_options = TeradataOptions(name=name,
+                                                 query=query,
+                                                 database=database,
+                                                 table=table)
 
         # If no name, use the table as the default name.
         if name is None and table is None:
@@ -163,7 +163,10 @@ class TeradataOptions:
     def from_proto(cls, teradata_options_proto: DataSourceProto.CustomSourceOptions):
         config = json.loads(teradata_options_proto.configuration.decode("utf8"))
         teradata_options = cls(
-            name=config["name"], query=config["query"], table=config["table"], database=["database"]
+            name=config["name"],
+            query=config["query"],
+            table=config["table"],
+            database=config["database"]
         )
 
         return teradata_options
@@ -171,7 +174,10 @@ class TeradataOptions:
     def to_proto(self) -> DataSourceProto.CustomSourceOptions:
         teradata_options_proto = DataSourceProto.CustomSourceOptions(
             configuration=json.dumps(
-                {"name": self._name, "query": self._query, "table": self._table, "database": self._database}
+                {"name": self._name,
+                 "query": self._query,
+                 "table": self._table,
+                 "database": self._database}
             ).encode()
         )
         return teradata_options_proto
@@ -184,7 +190,10 @@ class SavedDatasetTeradataStorage(SavedDatasetStorage):
 
     def __init__(self, table_ref: str):
         self.teradata_options = TeradataOptions(
-            table=table_ref, name=None, query=None, database=None
+            table=table_ref,
+            name=None,
+            query=None,
+            database=None
         )
 
     @staticmethod
