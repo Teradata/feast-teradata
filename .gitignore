@@ -9,3 +9,4 @@ dist/
 feature_repo/online_store.db
 feature_repo/registry.db
 output
+.DS_Store
