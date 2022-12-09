@@ -78,4 +78,4 @@ def init_repo(repo_name: str, template: str):
     click.echo()
 
 
-init_repo("test_td", "teradata");
+init_repo("Git_test_td", "teradata");

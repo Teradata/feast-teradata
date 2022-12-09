@@ -18,8 +18,53 @@ from feast_teradata.teradata_utils import (
     get_conn,
     TeradataConfig
 )
+from teradataml import DataFrame
 
 
+def td_type_to_feast_value_type(type_str: str) -> ValueType:
+    type_map: Dict[str, ValueType] = {
+        "boolean": ValueType.BOOL,
+        "bytea": ValueType.BYTES,
+        "char": ValueType.STRING,
+        "<class 'int'>": ValueType.INT64,
+        "smallint": ValueType.INT32,
+        "integer": ValueType.INT32,
+        "<class 'float'>": ValueType.FLOAT,
+        "double precision": ValueType.DOUBLE,
+        "boolean[]": ValueType.BOOL_LIST,
+        "bytea[]": ValueType.BYTES_LIST,
+        "char[]": ValueType.STRING_LIST,
+        "smallint[]": ValueType.INT32_LIST,
+        "integer[]": ValueType.INT32_LIST,
+        "text": ValueType.STRING,
+        "text[]": ValueType.STRING_LIST,
+        "character[]": ValueType.STRING_LIST,
+        "bigint[]": ValueType.INT64_LIST,
+        "real[]": ValueType.DOUBLE_LIST,
+        "double precision[]": ValueType.DOUBLE_LIST,
+        "character": ValueType.STRING,
+        "character varying": ValueType.STRING,
+        "date": ValueType.UNIX_TIMESTAMP,
+        "time without time zone": ValueType.UNIX_TIMESTAMP,
+        "timestamp without time zone": ValueType.UNIX_TIMESTAMP,
+        "timestamp without time zone[]": ValueType.UNIX_TIMESTAMP_LIST,
+        "date[]": ValueType.UNIX_TIMESTAMP_LIST,
+        "time without time zone[]": ValueType.UNIX_TIMESTAMP_LIST,
+        "<class 'datetime.datetime'>": ValueType.UNIX_TIMESTAMP,
+        "timestamp with time zone[]": ValueType.UNIX_TIMESTAMP_LIST,
+        "numeric[]": ValueType.DOUBLE_LIST,
+        "numeric": ValueType.DOUBLE,
+        "uuid": ValueType.STRING,
+        "uuid[]": ValueType.STRING_LIST,
+    }
+    value = (
+        type_map[f"""{type_str}"""]
+        if f"""{type_str}""" in type_map
+        else ValueType.UNKNOWN
+    )
+    if value == ValueType.UNKNOWN:
+        print("unknown type:", type_str)
+    return value
 @typechecked
 class TeradataSource(DataSource):
     def __init__(
@@ -92,6 +137,13 @@ class TeradataSource(DataSource):
             owner=data_source.owner,
         )
 
+    def get_table_query_string(self) -> str:
+        """Returns a string that can directly be used to reference this table in SQL."""
+        if self._teradata_options._table:
+            return f"{self._teradata_options._table}"
+        else:
+            return f"({self._teradata_options._query})"
+
     def to_proto(self) -> DataSourceProto:
         data_source_proto = DataSourceProto(
             name=self.name,
@@ -112,40 +164,25 @@ class TeradataSource(DataSource):
     def validate(self, config: RepoConfig):
         pass
 
+
     @staticmethod
     def source_datatype_to_feast_value_type() -> Callable[[str], ValueType]:
-        type_map = {
-            "BINARY": ValueType.BYTES,
-            "VARCHAR": ValueType.STRING,
-            "NUMBER32": ValueType.INT32,
-            "NUMBER64": ValueType.INT64,
-            "NUMBERwSCALE": ValueType.DOUBLE,
-            "DOUBLE": ValueType.DOUBLE,
-            "BOOLEAN": ValueType.BOOL,
-            "DATE": ValueType.UNIX_TIMESTAMP,
-            "TIMESTAMP": ValueType.UNIX_TIMESTAMP,
-            "TIMESTAMP_TZ": ValueType.UNIX_TIMESTAMP,
-            "TIMESTAMP_LTZ": ValueType.UNIX_TIMESTAMP,
-            "TIMESTAMP_NTZ": ValueType.UNIX_TIMESTAMP,
-        }
-        return type_map
+        return td_type_to_feast_value_type
 
     def get_table_column_names_and_types(
             self, config: RepoConfig
     ) -> Iterable[Tuple[str, str]]:
+        with get_conn(config.offline_store).raw_connection().cursor() as cur:
+            # df = pd.read_sql(f"SELECT * FROM {self.get_table_query_string()} sample 1", conn)
+            # column_names = df.columns
+            # types = df.dtypes
+            # return list(zip(column_names, types))
+            cur.execute(
+                f"SELECT * FROM {self.get_table_query_string()} sample 1"
+            )
+            name_desc_ret = [(item[0], item[1]) for item in cur.description]
 
-        # use the types as defined in feast.type_map
-        return [("col1", "NUMBER32"),
-                ("col2", "DOUBLE"),
-                ("col3", "DOUBLE")]
-
-    def get_table_query_string(self) -> str:
-        if self._teradata_options._table:
-            return f"{self._teradata_options._table}"
-        else:
-            return f"({self._teradata_options._query})"
-
-
+            return name_desc_ret
 class TeradataOptions:
     def __init__(
             self,
@@ -219,5 +256,3 @@ def df_to_teradata_table(config: TeradataConfig, df: pd.DataFrame, table_name: s
         df.to_sql(name=table_name, con=conn, if_exists='replace', index=False)
 
         return col_type_dict
-
-
