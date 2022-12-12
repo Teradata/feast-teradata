@@ -253,7 +253,7 @@ class TeradataOfflineStore(OfflineStore):
         with get_conn(config.offline_store).connect() as conn:
             table_df.to_sql(name=feature_view.batch_source.name,
                             con=conn,
-                            if_exists="replace",
+                            if_exists="append",
                             index=False)
 
 class TeradataRetrievalJob(RetrievalJob):
