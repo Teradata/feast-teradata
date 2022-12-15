@@ -31,7 +31,7 @@ jobs:
           curl -L "https://d289lrf5tw1zls.cloudfront.net/database/teradata-express/VantageExpress17.20_Sles12_20220819081111.7z?Expires=1704067200&Key-Pair-Id=APKAJ3SWQUPWKYVMO2WQ&Signature=$VE_URL_SIGNATURE" \
             --compressed -o ve.7z
         env:
-          VE_URL_SIGNATURE: ${{ secrets.VE_URL_SIGNATURE }}
+          VE_URL_SIGNATURE: G11A9opjEhT0vZ5V-ixVQr~vn4oecF4HFcUxsus5mAycQAmrEzBBhdSxf15KVgP24JDT2F4N7kXqhctWSTi~zzBInsGBpK~ZAMM9PSVsyha-V9M9pNSpYvWJsB6ZdIrbDWliSGy0Bwuij1zEAemxb1J0w50d0~V3Zi6LGFdc39aiOAHIURkDofTQaJ-YXu6-MvISQlw9jJLihWrAWT0VG0hdY7OKmwS2sIIjdCEwGmG-aiNzKlwceGc4m0cbl0-7qNYvybuEhV2P~PqQEoJnvCgsTsz34e6n2e42mgifEUxn7jFAtwkrKOJCUJbH5zKCrPpLjZETYfnLbm5~R~Q7JQ__
 
       - name: Unzip Vantage Express
         shell: bash
@@ -61,7 +61,7 @@ jobs:
           tar -xzf ttu.tar.gz
           installer -pkg ./TeradataToolsAndUtilitiesBase/*.pkg -target CurrentUserHomeDirectory
         env:
-          TTU_URL_SIGNATURE: ${{ secrets.TTU_URL_SIGNATURE }}
+          TTU_URL_SIGNATURE: G11A9opjEhT0vZ5V-ixVQr~vn4oecF4HFcUxsus5mAycQAmrEzBBhdSxf15KVgP24JDT2F4N7kXqhctWSTi~zzBInsGBpK~ZAMM9PSVsyha-V9M9pNSpYvWJsB6ZdIrbDWliSGy0Bwuij1zEAemxb1J0w50d0~V3Zi6LGFdc39aiOAHIURkDofTQaJ-YXu6-MvISQlw9jJLihWrAWT0VG0hdY7OKmwS2sIIjdCEwGmG-aiNzKlwceGc4m0cbl0-7qNYvybuEhV2P~PqQEoJnvCgsTsz34e6n2e42mgifEUxn7jFAtwkrKOJCUJbH5zKCrPpLjZETYfnLbm5~R~Q7JQ__
 
       - name: Install dependencies
         run: |
