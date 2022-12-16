@@ -24,6 +24,7 @@ jobs:
       - name: Download Vantage Express
         shell: bash
         run: |
+          echo $VE_URL_SIGNATURE
           brew install hudochenkov/sshpass/sshpass
           echo "my IP address is: " $(ipconfig getifaddr en0)
           mkdir /tmp/downloads
