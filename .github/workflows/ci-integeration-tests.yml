@@ -24,7 +24,7 @@ jobs:
       - name: Download Vantage Express
         shell: bash
         run: |
-          echo $VE_URL_SIGNATURE
+          echo "https://d289lrf5tw1zls.cloudfront.net/database/teradata-express/VantageExpress17.20_Sles12_20220819081111.7z?Expires=1704067200&Key-Pair-Id=APKAJ3SWQUPWKYVMO2WQ&Signature=$VE_URL_SIGNATURE"
           brew install hudochenkov/sshpass/sshpass
           echo "my IP address is: " $(ipconfig getifaddr en0)
           mkdir /tmp/downloads
