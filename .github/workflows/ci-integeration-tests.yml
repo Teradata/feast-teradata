@@ -31,7 +31,7 @@ jobs:
           curl -L "https://d289lrf5tw1zls.cloudfront.net/database/teradata-express/VantageExpress17.20_Sles12_20220819081111.7z?Expires=1704067200&Key-Pair-Id=APKAJ3SWQUPWKYVMO2WQ&Signature=$VE_URL_SIGNATURE" \
             --compressed -o ve.7z
         env:
-          VE_URL_SIGNATURE: G11A9opjEhT0vZ5V-ixVQr~vn4oecF4HFcUxsus5mAycQAmrEzBBhdSxf15KVgP24JDT2F4N7kXqhctWSTi~zzBInsGBpK~ZAMM9PSVsyha-V9M9pNSpYvWJsB6ZdIrbDWliSGy0Bwuij1zEAemxb1J0w50d0~V3Zi6LGFdc39aiOAHIURkDofTQaJ-YXu6-MvISQlw9jJLihWrAWT0VG0hdY7OKmwS2sIIjdCEwGmG-aiNzKlwceGc4m0cbl0-7qNYvybuEhV2P~PqQEoJnvCgsTsz34e6n2e42mgifEUxn7jFAtwkrKOJCUJbH5zKCrPpLjZETYfnLbm5~R~Q7JQ__
+          VE_URL_SIGNATURE: ${{ secrets.VE_URL_SIGNATURE }}
 
       - name: Unzip Vantage Express
         shell: bash
@@ -53,15 +53,6 @@ jobs:
           vboxmanage modifyvm "$VM_NAME" --natpf1 "tdssh,tcp,,4422,,22"
           vboxmanage modifyvm "$VM_NAME" --natpf1 "tddb,tcp,,1025,,1025"
           vboxmanage startvm "$VM_NAME" --type headless
-      - name: Install TTU
-        shell: bash
-        run: |
-          curl -L "https://d289lrf5tw1zls.cloudfront.net/tools/ttu/TeradataToolsAndUtilitiesBase__macosx_x86_64.17.20.08.00.tar.gz?Expires=1704067200&Key-Pair-Id=APKAJ3SWQUPWKYVMO2WQ&Signature=$TTU_URL_SIGNATURE" \
-            --compressed -o ttu.tar.gz
-          tar -xzf ttu.tar.gz
-          installer -pkg ./TeradataToolsAndUtilitiesBase/*.pkg -target CurrentUserHomeDirectory
-        env:
-          TTU_URL_SIGNATURE: G11A9opjEhT0vZ5V-ixVQr~vn4oecF4HFcUxsus5mAycQAmrEzBBhdSxf15KVgP24JDT2F4N7kXqhctWSTi~zzBInsGBpK~ZAMM9PSVsyha-V9M9pNSpYvWJsB6ZdIrbDWliSGy0Bwuij1zEAemxb1J0w50d0~V3Zi6LGFdc39aiOAHIURkDofTQaJ-YXu6-MvISQlw9jJLihWrAWT0VG0hdY7OKmwS2sIIjdCEwGmG-aiNzKlwceGc4m0cbl0-7qNYvybuEhV2P~PqQEoJnvCgsTsz34e6n2e42mgifEUxn7jFAtwkrKOJCUJbH5zKCrPpLjZETYfnLbm5~R~Q7JQ__
 
       - name: Install dependencies
         run: |
