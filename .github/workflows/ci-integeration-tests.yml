@@ -66,4 +66,4 @@ jobs:
         shell: bash
         run: ./.github/workflows/scripts/verifyVantageIsRunning.sh
       - name: Run pytest tests
-        run: echo "Hello"
+        run: echo "Hello world"
