@@ -1,4 +1,5 @@
 import click
+import os
 
 from feast.file_utils import replace_str_in_file
 
@@ -6,10 +7,8 @@ from teradataml import (
     create_context,
     get_context
 )
-import getpass
 
-from teradataml import (
-    copy_to_sql)
+
 def bootstrap():
     # Bootstrap() will automatically be called from the init_repo() during `feast init`
 
@@ -33,11 +32,22 @@ def bootstrap():
     driver_stats_path = data_path / "driver_stats.parquet"
     driver_df.to_parquet(path=str(driver_stats_path), allow_truncated_timestamps=True)
 
-    host = click.prompt("Teradata Host URL: ")
-    teradata_user = click.prompt("Teradata User Name:")
-    teradata_password = click.prompt("Teradata Password:", hide_input=True)
-    teradata_database = click.prompt("Teradata Database Name:")
-    teradata_log_mech = click.prompt("Teradata Connection Mechanism:")
+    # check if running in interactive mode or via CI
+    is_interactive = os.environ.get("CI_RUNNING", "false").lower() == "false"
+    if is_interactive:
+        host = click.prompt("Teradata Host URL: ")
+        teradata_user = click.prompt("Teradata User Name:")
+        teradata_password = click.prompt("Teradata Password:", hide_input=True)
+        teradata_database = click.prompt("Teradata Database Name:")
+        teradata_log_mech = click.prompt("Teradata Connection Mechanism:")
+
+    else:
+        host = os.environ.get("CI_TD_HOST")
+        teradata_user = os.environ.get("CI_TD_USER")
+        teradata_password = os.environ.get("CI_TD_PASSWORD")
+        teradata_database = os.environ.get("CI_TD_DATABASE")
+        teradata_log_mech = os.environ.get("CI_TD_LOGMECH")
+
     config_file = repo_path / "feature_store.yaml"
     path = 'teradatasql://'+ teradata_user +':' + teradata_password + '@'+host + '/?database=' + teradata_database + '&LOGMECH=' + teradata_log_mech
     replace_str_in_file(config_file, "Teradata registry path", path)
@@ -50,7 +60,7 @@ def bootstrap():
         replace_str_in_file(config_file, "Teradata database", teradata_database)
         replace_str_in_file(config_file, "Teradata log_mech", teradata_log_mech)
 
-    if click.confirm(
+    if not is_interactive or click.confirm(
         f'Should I upload example data to Teradata (overwriting "{project_name}_feast_driver_hourly_stats" table)?',
         default=True,
     ):

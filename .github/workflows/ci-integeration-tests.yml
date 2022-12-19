@@ -65,5 +65,15 @@ jobs:
       - name: Verify Vantage Express is running
         shell: bash
         run: ./.github/workflows/scripts/verifyVantageIsRunning.sh
-      - name: Run pytest tests
-        run: echo "Hello world"
+      - name: Run test workflow
+        run: |
+          python create_repo.py
+          python test-repo/test_workflow.py
+        env:
+          CI_RUNNING: "true"
+          CI_TD_HOST: "127.0.0.1"
+          CI_TD_USER: "dbc"
+          CI_TD_PASSWORD: "dbc"
+          CI_TD_DATABASE: "dbc"
+          CI_TD_LOGMECH: "TDNEGO"
+          CI_FEAST_REPO_NAME: "test-repo"
