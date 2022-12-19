@@ -28,8 +28,7 @@ jobs:
           echo "my IP address is: " $(ipconfig getifaddr en0)
           mkdir /tmp/downloads
           cd /tmp/downloads
-          curl -L "https://d289lrf5tw1zls.cloudfront.net/database/teradata-express/VantageExpress17.20_Sles12_20220819081111.7z?Expires=1704067200&Key-Pair-Id=APKAJ3SWQUPWKYVMO2WQ&Signature=$VE_URL_SIGNATURE" \
-            --compressed -o ve.7z
+          curl -L $VE_URL_SIGNATURE --compressed -o ve.7z
         env:
           VE_URL_SIGNATURE: ${{ secrets.VE_URL_SIGNATURE }}
 
