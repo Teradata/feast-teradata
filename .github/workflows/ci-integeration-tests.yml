@@ -56,7 +56,7 @@ jobs:
       - name: Install TTU
         shell: bash
         run: |
-          curl -L $VE_URL_SIGNATURE --compressed -o ttu.tar.gz
+          curl -L $TTU_URL_SIGNATURE --compressed -o ttu.tar.gz
           tar -xzf ttu.tar.gz
           installer -pkg ./TeradataToolsAndUtilitiesBase/*.pkg -target CurrentUserHomeDirectory
         env:
