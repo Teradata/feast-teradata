@@ -53,6 +53,15 @@ jobs:
           vboxmanage modifyvm "$VM_NAME" --natpf1 "tddb,tcp,,1025,,1025"
           vboxmanage startvm "$VM_NAME" --type headless
 
+      - name: Install TTU
+        shell: bash
+        run: |
+          curl -L $VE_URL_SIGNATURE --compressed -o ttu.tar.gz
+          tar -xzf ttu.tar.gz
+          installer -pkg ./TeradataToolsAndUtilitiesBase/*.pkg -target CurrentUserHomeDirectory
+        env:
+          TTU_URL_SIGNATURE: ${{ secrets.TTU_URL_SIGNATURE }}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -74,6 +83,8 @@ jobs:
             AS PERMANENT = 60e6, SPOOL = 120e6;
           .logoff
           EOF
+
+          bteq < /tmp/pytestdatabase.bteq
       - name: Run test workflow
         run: |
           python create_repo.py

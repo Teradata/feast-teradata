@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
+set -e
+
 # add bteq to path
 export PATH=$PATH:"/Users/runner/Library/Application Support/teradata/client/17.10/bin/"
+
+echo "ls of /Users/runner/Library/Application Support/teradata/client/17.10/bin/"
+ls /Users/runner/Library/Application Support/teradata/client/17.10/bin/
 
 # prepare bteq test script
 cat << EOF > /tmp/test.bteq
