@@ -31,6 +31,8 @@ def init_repo():
     else:
         repo_name = os.environ.get("CI_FEAST_REPO_NAME")
 
+    print(repo_name)
+
     if not is_valid_name(repo_name):
         raise BadParameter(
             message="Name should be alphanumeric values and underscores but not start with an underscore",
