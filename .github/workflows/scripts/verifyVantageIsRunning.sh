@@ -3,7 +3,7 @@
 set -e
 
 # add bteq to path
-export PATH=$PATH:"/Users/runner/Library/Application Support/teradata/client/17.10/bin/"
+export PATH=$PATH:"/Users/runner/Library/Application Support/teradata/client/17.20/bin/"
 
 # prepare bteq test script
 cat << EOF > /tmp/test.bteq
