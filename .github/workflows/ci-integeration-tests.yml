@@ -65,6 +65,15 @@ jobs:
       - name: Verify Vantage Express is running
         shell: bash
         run: ./.github/workflows/scripts/verifyVantageIsRunning.sh
+      - name: Create test database
+        run: |
+          cat << EOF > /tmp/pytestdatabase.bteq
+          .SET EXITONDELAY ON MAXREQTIME 20
+          .logon 127.0.0.1/dbc,dbc
+          CREATE DATABASE DBT_TEST
+            AS PERMANENT = 60e6, SPOOL = 120e6;
+          .logoff
+          EOF
       - name: Run test workflow
         run: |
           python create_repo.py
@@ -74,6 +83,6 @@ jobs:
           CI_TD_HOST: "127.0.0.1"
           CI_TD_USER: "dbc"
           CI_TD_PASSWORD: "dbc"
-          CI_TD_DATABASE: "dbc"
+          CI_TD_DATABASE: "DBT_TEST"
           CI_TD_LOGMECH: "TDNEGO"
-          CI_FEAST_REPO_NAME: "Test_repo"
+          CI_FEAST_REPO_NAME: "test_repo"
