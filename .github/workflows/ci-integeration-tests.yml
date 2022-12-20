@@ -76,4 +76,4 @@ jobs:
           CI_TD_PASSWORD: "dbc"
           CI_TD_DATABASE: "dbc"
           CI_TD_LOGMECH: "TDNEGO"
-          CI_FEAST_REPO_NAME: "test-repo"
+          CI_FEAST_REPO_NAME: "Test_repo"
