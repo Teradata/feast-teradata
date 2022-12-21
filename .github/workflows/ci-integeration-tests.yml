@@ -79,7 +79,6 @@ jobs:
         run: ./.github/workflows/scripts/createDatabase.sh
       - name: Run test workflow
         run: |
-          cd ..
           python create_repo.py
           cd test_repo
           python test_workflow.py
