@@ -1,6 +1,26 @@
 # Feast Teradata Connector
 [![test-offline-store](https://github.com/feast-dev/feast-custom-offline-store-demo/actions/workflows/test_custom_offline_store.yml/badge.svg?branch=main)](https://github.com/feast-dev/feast-custom-offline-store-demo/actions/workflows/test_custom_offline_store.yml)
 
+## Introduction
+
+Feast's connector for Teradata is a complete implementation with support for all features 
+and uses teradata as an online and offline store. 
+
+## Getting Started
+
+We will now walk you through how to quickly set this up on your local machine to get started. 
+Once the repository has been cloned in your local machine, you need to run the file `create_repo.py`
+which can be found in the root (feast-teradata) directory. If environment variables have not
+been set prior to running this, the terminal will prompt you to enter the project name, Teradata host URL,
+username, password, database name and the connection mechanism. After running successfully,
+the script will create an entire folder structure required to run the example. It
+also has a toy dataset included on driver data. 
+
+Once the structure is created, running the `feast-teradata/<your-repo-name>/test_workflow.py` file,
+will create a feature store, fetch historical features (using entity dataframes as well as sql),
+materialize these features, fetch online features using different sources (push as well as feature service) and
+finally teardown the entire structure. 
+
 ## Offline Store
 
 ### Overview
