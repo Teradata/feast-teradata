@@ -18,6 +18,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python }}
+
       - name: Check out repository code
         uses: actions/checkout@v2
 
@@ -74,9 +75,11 @@ jobs:
       - name: Verify Vantage Express is running
         shell: bash
         run: ./.github/workflows/scripts/verifyVantageIsRunning.sh
+
       - name: Create test database
         shell: bash
         run: ./.github/workflows/scripts/createDatabase.sh
+
       - name: Run test workflow
         run: |
           python create_repo.py
