@@ -82,9 +82,9 @@ jobs:
 
       - name: Run test workflow
         run: |
-          python create_repo.py
           pip install .
-          python test_repo/test_workflow.py
+          python create_repo.py
+          cd test_repo && python test_workflow.py
         env:
           CI_RUNNING: "true"
           CI_TD_HOST: "127.0.0.1"

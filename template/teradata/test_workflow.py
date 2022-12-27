@@ -11,7 +11,7 @@ from feast.data_source import PushMode
 
 
 def run_demo():
-    store = FeatureStore(repo_path="./feature_repo")
+    store = FeatureStore(repo_path="./")
     print("\n--- Run feast apply to setup feature store on Teradata ---")
     command = "cd feature_repo; feast apply"
     subprocess.run(command, shell=True)
