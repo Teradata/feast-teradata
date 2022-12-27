@@ -83,7 +83,7 @@ jobs:
       - name: Run test workflow
         run: |
           python create_repo.py
-          pip install . --use-feature=in-tree-build
+          pip install .
           python test_repo/test_workflow.py
         env:
           CI_RUNNING: "true"
