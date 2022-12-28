@@ -211,3 +211,9 @@ In our case, the column `flower_id` is used to uniquely identify the different r
 of the entity flower. We are currently fetching values of the features where flower_id
 is equal to 5. We can also fetch multiple such rows using the format: 
 `[{flower_id: val_1}, {flower_id: val_2}, .., {flower_id: val_n}]`
+
+## Release Notes
+
+### 0.1
+
+- Feature: Initial implementation of feast-teradata library
