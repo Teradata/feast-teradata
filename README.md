@@ -35,32 +35,36 @@ offline_store:
 ### Example Feature Definitions
 
 ```python
+import yaml
+import pandas as pd
 from datetime import timedelta
-from feast import Entity, Field, FeatureView
-from feast.types import Float64, Int64
+from feast import Entity, Field, FeatureView,FeatureService, PushSource,RequestSource
+from feast.on_demand_feature_view import on_demand_feature_view
+from feast.types import Float64, Int64, Float32
 from feast_teradata.offline.teradata_source import TeradataSource
 
-flower_stats = TeradataSource(
-    name="iris_ds",
-    query="SELECT * FROM iris_data",
-    timestamp_field="event_timestamp"
+driver = Entity(name="driver", join_keys=["driver_id"])
+project_name = yaml.safe_load(open("feature_store.yaml"))["project"]
+
+driver_stats_source = TeradataSource(
+    database=yaml.safe_load(open("feature_store.yaml"))["offline_store"]["database"],
+    table=f"{project_name}_feast_driver_hourly_stats",
+    timestamp_field="event_timestamp",
+    created_timestamp_column="created",
 )
 
-flower = Entity(name="flower", join_keys=["flower_id"])
-
-df_feature_view = FeatureView(
-    name="df_feature_view",
-    ttl=timedelta(days=3),
-    entities=[flower],
+driver_stats_fv = FeatureView(
+    name="driver_hourly_stats",
+    entities=[driver],
+    ttl=timedelta(weeks=52 * 10),
     schema=[
-        Field(name="flower_id", dtype=Int64),
-        Field(name="sepal length (cm)", dtype=Float64),
-        Field(name="sepal width (cm)", dtype=Float64),
-        Field(name="petal length (cm)", dtype=Float64),
-        Field(name="petal width (cm)", dtype=Float64),
-        ],
-    online=True,
-    source=flower_stats
+        Field(name="driver_id", dtype=Int64),
+        Field(name="conv_rate", dtype=Float32),
+        Field(name="acc_rate", dtype=Float32),
+        Field(name="avg_daily_trips", dtype=Int64),
+    ],
+    source=driver_stats_source,
+    tags={"team": "driver_performance"},
 )
 
 ```
@@ -93,38 +97,21 @@ fs.apply([<name_of_entity>, <name_of_feature_view>])
 
 
 ```python
-rs = fs.get_historical_features(
-    entity_df="SELECT event_timestamp, flower_id FROM iris_data",
-    features=[
-        "df_feature_view:sepal length (cm)",
-        "df_feature_view:sepal width (cm)",
-        "df_feature_view:petal length (cm)",
-        "df_feature_view:petal width (cm)"
-    ]
-    ).to_df()
-```
+        entity_sql = f"""
+            SELECT
+                "driver_id",
+                "event_timestamp"
+            FROM {fs.get_data_source(table_name).get_table_query_string()}
+            WHERE "event_timestamp" BETWEEN '{start_date}' AND '{end_date}'
+        """
 
-Another pathway could be the following:
-
-```python
-from teradataml import create_context, get_context
-
-username = <username>
-password = <password>
-hostname = <hostname>
-logmech = <connection mechanism>
-create_context(host=hostname, username=username, password=password, logmech=logmech)
-
-target_df = pd.read_sql("SELECT event_timestamp, flower_id FROM iris_data", get_context())
-
-rs = fs.get_historical_features(
-    entity_df=target_df,
-    features=[
-        "df_feature_view:sepal length (cm)",
-        "df_feature_view:sepal width (cm)",
-        "df_feature_view:petal length (cm)",
-        "df_feature_view:petal width (cm)"
-    ]
+    training_df = fs.get_historical_features(
+        entity_df=entity_sql,
+        features=[
+            "driver_hourly_stats:conv_rate",
+            "driver_hourly_stats:acc_rate",
+            "driver_hourly_stats:avg_daily_trips",
+        ],
     ).to_df()
 ```
 
@@ -176,18 +163,36 @@ fs.apply([<name_of_entity>, <name_of_feature_view>])
 ```
 
 ```python
-fs.materialize_incremental(end_date=datetime.now())
-
-feature_vector = fs.get_online_features(
-    features=[
-        "df_feature_view:sepal length (cm)",
-        "df_feature_view:sepal width (cm)",
-        "df_feature_view:petal length (cm)",
-        "df_feature_view:petal width (cm)"
-    ], entity_rows=[{"flower_id": 5}]
+def fetch_online_features(store, source: str = ""):
+    entity_rows = [
+        # {join_key: entity_value}
+        {
+            "driver_id": 1001,
+            "val_to_add": 1000,
+            "val_to_add_2": 2000,
+        },
+        {
+            "driver_id": 1002,
+            "val_to_add": 1001,
+            "val_to_add_2": 2002,
+        },
+    ]
+    if source == "feature_service":
+        features_to_fetch = store.get_feature_service("driver_activity_v1")
+    elif source == "push":
+        features_to_fetch = store.get_feature_service("driver_activity_v3")
+    else:
+        features_to_fetch = [
+            "driver_hourly_stats:acc_rate",
+            "transformed_conv_rate:conv_rate_plus_val1",
+            "transformed_conv_rate:conv_rate_plus_val2",
+        ]
+    returned_features = store.get_online_features(
+        features=features_to_fetch,
+        entity_rows=entity_rows,
     ).to_dict()
-
-print(feature_vector)
+    for key, value in sorted(returned_features.items()):
+        print(key, " : ", value)
 ```
 
 The command below is used to incrementally materialize features in the online store. 
@@ -207,10 +212,12 @@ Next, while fetching the online features, we have two parameters `features` and
 that are present in the `df_feature_view`. The example above shows all 4 features present
 but these can be less than 4 as well. Secondly, the `entity_rows` parameter is also
 a list and takes a dictionary of the form {feature_identifier_column: value_to_be_fetched}.
-In our case, the column `flower_id` is used to uniquely identify the different rows
-of the entity flower. We are currently fetching values of the features where flower_id
+In our case, the column `driver_id` is used to uniquely identify the different rows
+of the entity driver. We are currently fetching values of the features where driver_id
 is equal to 5. We can also fetch multiple such rows using the format: 
-`[{flower_id: val_1}, {flower_id: val_2}, .., {flower_id: val_n}]`
+`[{driver_id: val_1}, {driver_id: val_2}, .., {driver_id: val_n}]`
+`[{driver_id: val_1}, {driver_id: val_2}, .., {driver_id: val_n}]`
+
 
 ## Release Notes
 
