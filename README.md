@@ -1,5 +1,5 @@
 # Feast Teradata Connector
-[![test-offline-store](https://github.com/feast-dev/feast-custom-offline-store-demo/actions/workflows/test_custom_offline_store.yml/badge.svg?branch=main)](https://github.com/feast-dev/feast-custom-offline-store-demo/actions/workflows/test_custom_offline_store.yml)
+[![feast-teradata](https://github.com/Teradata/feast-teradata/blob/master/.github/workflows/ci-integeration-tests.yml/badge.svg?branch=master)](https://github.com/Teradata/feast-teradata/blob/master/.github/workflows/ci-integeration-tests.yml)
 
 ## Offline Store
 
