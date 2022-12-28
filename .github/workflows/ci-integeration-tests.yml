@@ -80,14 +80,14 @@ jobs:
         shell: bash
         run: ./.github/workflows/scripts/createDatabase.sh
 
-      - name: Run test workflow
+      - name: Build and install package
         run: |
-          # build and install package
           python setup.py sdist bdist_wheel
           pip install dist/*.whl
-          # create repo
+
+      - name: Run test workflow
+        run: |
           python feast_teradata/cli/create_repo.py
-          # execute workflow test
           cd test_repo && python test_workflow.py
         env:
           CI_RUNNING: "true"
