@@ -82,7 +82,8 @@ jobs:
 
       - name: Run test workflow
         run: |
-          pip install .
+          python setup.py sdist bdist_wheel
+          pip install dist/*.whl
           python create_repo.py
           cd test_repo && python test_workflow.py
         env:
