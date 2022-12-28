@@ -1,11 +1,11 @@
-
 import sys
+import click
+import re
+import os
+
 from importlib.abc import Loader
 from importlib.machinery import ModuleSpec
-
 from click.exceptions import BadParameter
-import re
-
 from feast.file_utils import replace_str_in_file
 
 
@@ -14,12 +14,24 @@ def is_valid_name(name: str) -> bool:
     return not name.startswith("_") and re.compile(r"\W+").search(name) is None
 
 
-def init_repo(repo_name: str, template: str):
+def init_repo():
     import os
     from distutils.dir_util import copy_tree
     from pathlib import Path
 
     from colorama import Fore, Style
+
+    # check if running in interactive mode or via CI
+    is_interactive = os.environ.get("CI_RUNNING", "false").lower() == "false"
+
+    template = "teradata"
+
+    if is_interactive:
+        repo_name = click.prompt("Repository Name:")
+    else:
+        repo_name = os.environ.get("CI_FEAST_REPO_NAME")
+
+    print(repo_name)
 
     if not is_valid_name(repo_name):
         raise BadParameter(
@@ -66,10 +78,7 @@ def init_repo(repo_name: str, template: str):
 
     # Remove the __pycache__ folder if it exists
     import shutil
-
     shutil.rmtree(repo_path / "__pycache__", ignore_errors=True)
-
-    import click
 
     click.echo()
     click.echo(
@@ -78,4 +87,4 @@ def init_repo(repo_name: str, template: str):
     click.echo()
 
 
-init_repo("Git_test_td", "teradata");
+init_repo()
