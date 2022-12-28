@@ -87,4 +87,6 @@ def init_repo():
     click.echo()
 
 
-init_repo()
+if __name__ == '__main__':
+    init_repo()
+
