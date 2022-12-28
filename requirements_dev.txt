@@ -1,0 +1,8 @@
+twine
+bump2version
+wheel
+pytest~=7.0
+tox~=3.2
+MarkupSafe==2.0.1
+pytest-dotenv
+-e .
