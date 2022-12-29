@@ -87,7 +87,7 @@ jobs:
 
       - name: Run test workflow
         run: |
-          python feast_teradata/cli/create_repo.py
+          feast-td init-repo
           cd test_repo && python test_workflow.py
         env:
           CI_RUNNING: "true"

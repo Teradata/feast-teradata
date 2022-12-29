@@ -1,7 +1,6 @@
 import sys
 import click
 import re
-import os
 
 from importlib.abc import Loader
 from importlib.machinery import ModuleSpec
@@ -14,11 +13,16 @@ def is_valid_name(name: str) -> bool:
     return not name.startswith("_") and re.compile(r"\W+").search(name) is None
 
 
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
 def init_repo():
     import os
     from distutils.dir_util import copy_tree
     from pathlib import Path
-
     from colorama import Fore, Style
 
     # check if running in interactive mode or via CI
@@ -88,5 +92,5 @@ def init_repo():
 
 
 if __name__ == '__main__':
-    init_repo()
+    cli()
 

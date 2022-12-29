@@ -2,7 +2,6 @@ import click
 import os
 
 from feast.file_utils import replace_str_in_file
-
 from teradataml import (
     create_context,
     get_context

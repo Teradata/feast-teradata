@@ -24,9 +24,7 @@ setup(
     install_requires=required,
     tests_require=['pytest==6.2.4'],
     license_files=['LICENSE', 'LICENSE-3RD-PARTY.txt'],
-
-    # or script?
     entry_points={'console_scripts': [
-        'create_repo=feast_teradata.cli.create_repo:main',
+        'feast-td=feast_teradata.cli.cli:cli',
     ]},
 )
