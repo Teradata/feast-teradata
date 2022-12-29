@@ -8,7 +8,7 @@ with open("README.md") as f:
 
 setup(
     name="feast-teradata",
-    version="0.1",
+    version="1.0.0",
     author="Teradata Corporation",
     author_email="developers@teradata.com",
     url="https://github.com/Teradata/feast-teradata",
@@ -18,7 +18,8 @@ setup(
     packages=find_packages(exclude=('tests',)),
     package_data={
         'feast_teradata.cli': [
-            'template/teradata/**/*.*'
+            'template/teradata/**',
+            'template/teradata/**/**',
         ],
     },
     install_requires=required,
