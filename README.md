@@ -1,5 +1,5 @@
 # Feast Teradata Connector
-[![feast-teradata](https://github.com/Teradata/feast-teradata/blob/master/.github/workflows/ci-integeration-tests.yml/badge.svg?branch=master)](https://github.com/Teradata/feast-teradata/blob/master/.github/workflows/ci-integeration-tests.yml)
+[![feast-teradata tests](https://github.com/Teradata/feast-teradata/actions/workflows/ci-integeration-tests.yml/badge.svg?branch=master)](https://github.com/Teradata/feast-teradata/actions/workflows/ci-integeration-tests.yml)
 
 ## Overview
 
