@@ -2,7 +2,6 @@ import click
 import os
 
 from feast.file_utils import replace_str_in_file
-
 from teradataml import (
     create_context,
     get_context
@@ -75,7 +74,3 @@ def bootstrap():
         with teradata_conn as conn:
             driver_df.to_sql(name=f"{project_name}_feast_driver_hourly_stats", con=conn, if_exists="replace",
                              index=False)
-
-
-if __name__ == "__main__":
-    bootstrap()

@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - 'main'
+      - 'master'
 
 jobs:
   test:
@@ -80,11 +80,14 @@ jobs:
         shell: bash
         run: ./.github/workflows/scripts/createDatabase.sh
 
-      - name: Run test workflow
+      - name: Build and install package
         run: |
           python setup.py sdist bdist_wheel
           pip install dist/*.whl
-          python create_repo.py
+
+      - name: Run test workflow
+        run: |
+          feast-td init-repo
           cd test_repo && python test_workflow.py
         env:
           CI_RUNNING: "true"

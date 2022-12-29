@@ -1,7 +1,6 @@
 import sys
 import click
 import re
-import os
 
 from importlib.abc import Loader
 from importlib.machinery import ModuleSpec
@@ -14,11 +13,17 @@ def is_valid_name(name: str) -> bool:
     return not name.startswith("_") and re.compile(r"\W+").search(name) is None
 
 
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
 def init_repo():
     import os
+    import importlib.util
     from distutils.dir_util import copy_tree
     from pathlib import Path
-
     from colorama import Fore, Style
 
     # check if running in interactive mode or via CI
@@ -30,8 +35,6 @@ def init_repo():
         repo_name = click.prompt("Repository Name:")
     else:
         repo_name = os.environ.get("CI_FEAST_REPO_NAME")
-
-    print(repo_name)
 
     if not is_valid_name(repo_name):
         raise BadParameter(
@@ -54,21 +57,20 @@ def init_repo():
 
     # Copy template directory
     template_path = str(Path(Path(__file__).parent / "template" / template).absolute())
-    # x
     copy_tree(template_path, str(repo_path))
 
     # Seed the repository
     bootstrap_path = repo_path / "bootstrap.py"
-    if os.path.exists(bootstrap_path):
-        import importlib.util
+    if not os.path.exists(bootstrap_path):
+        raise Exception(f"boostrap.py not found at {bootstrap_path}")
 
-        spec = importlib.util.spec_from_file_location("bootstrap", str(bootstrap_path))
-        assert isinstance(spec, ModuleSpec)
-        bootstrap = importlib.util.module_from_spec(spec)
-        assert isinstance(spec.loader, Loader)
-        spec.loader.exec_module(bootstrap)
-        bootstrap.bootstrap()  # type: ignore
-        os.remove(bootstrap_path)
+    spec = importlib.util.spec_from_file_location("bootstrap", str(bootstrap_path))
+    assert isinstance(spec, ModuleSpec)
+    bootstrap = importlib.util.module_from_spec(spec)
+    assert isinstance(spec.loader, Loader)
+    spec.loader.exec_module(bootstrap)
+    bootstrap.bootstrap()  # type: ignore
+    os.remove(bootstrap_path)
 
     # template the feature_store.yaml file
     feature_store_yaml_path = repo_path / "feature_repo" / "feature_store.yaml"
@@ -87,4 +89,6 @@ def init_repo():
     click.echo()
 
 
-init_repo()
+if __name__ == '__main__':
+    cli()
+
