@@ -47,7 +47,7 @@ To see the registry information in the feast ui, run the following command. Note
 feast ui --registry_ttl_sec=120
 ```
 
-Now, lets batch read some features for training (or batch scoring)
+Now, lets batch read some features for training taking only entities for which we have seen an event for in the last `60` days. This filter could be on anything that is relevant for the entity (population) selection for the given training dataset.
 
 ```python
 from feast import FeatureStore
@@ -59,10 +59,9 @@ training_df = store.get_historical_features(
     entity_df=f"""
             SELECT
                 driver_id,
-                CURRENT_TIMESTAMP as event_timestamp
+                event_timestamp
             FROM demo_feast_driver_hourly_stats
             WHERE event_timestamp BETWEEN (CURRENT_TIMESTAMP - INTERVAL '60' DAY) AND CURRENT_TIMESTAMP
-            GROUP BY driver_id
         """,
     features=[
         "driver_hourly_stats:conv_rate",
@@ -73,7 +72,17 @@ training_df = store.get_historical_features(
 print(training_df.head())
 ```
 
-To see a complete, end-to-end example workflow example, see the `demo/test_workflow.py` script. This script is used for testing the complete feast functionality.
+To get the features for batch scoring, we would only change the `entity_df` sql query to select the list of `driver_id` to score on. Additionally, the `event_timestamp` can be the current timestamp for example in this scenario. 
+
+```sql
+SELECT
+    "driver_id",
+    CURRENT_TIMESTAMP AS "event_timestamp"
+FROM <relevant-entity-table>
+WHERE <relevant predicates>
+```
+
+To see a complete (but not real-world), end-to-end example workflow example, see the `demo/test_workflow.py` script. This script is used for testing the complete feast functionality.
 
 
 ## Release Notes
