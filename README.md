@@ -91,6 +91,7 @@ The `feast-teradata` library allows you to use the complete set of feast APIs an
 - Doc: Improve README with better getting started information. 
 - Fix: Remove pytest from requirements.txt
 - Fix: Set minimum python version to 3.8 due to feast dependency on pandas>=1.4.3
+- Fix: Updated feast-td types conversion
 
 
 ### 1.0.0
