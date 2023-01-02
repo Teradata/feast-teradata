@@ -14,7 +14,7 @@ setup(
     url="https://github.com/Teradata/feast-teradata",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     packages=find_packages(exclude=('tests',)),
     package_data={
         'feast_teradata.cli': [

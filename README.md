@@ -27,6 +27,7 @@ feast-td init-repo
 
 This will then prompt you for the required information for the Teradata system and upload the example dataset. Let's assume you used the repo name `demo` when running the above command. You can find the repository files along with a file called `test_workflow.py`. Running this `test_workflow.py` will execute a complete workflow for feast with Teradata as the Registry, OfflineStore and OnlineStore. 
 
+
 ```
 demo/
     feature_repo/
@@ -35,11 +36,14 @@ demo/
     test_workflow.py
 ```
 
+
 From within the `demo/feature_repo` directory, execute the following feast command to apply (import/update) the repo definition into the registry. You will be able to see the registry metadata tables in the teradata database after running this command.
+
 
 ```bash
 feast apply
 ```
+
 
 To see the registry information in the feast ui, run the following command. Note the --registry_ttl_sec is important as by default it polls every 5 seconds. 
 
@@ -51,6 +55,7 @@ feast ui --registry_ttl_sec=120
 ## Example Usage
 
 Now, lets batch read some features for training, using only entities (population) for which we have seen an event for in the last `60` days. The predicates (filter) used can be on anything that is relevant for the entity (population) selection for the given training dataset. The `event_timestamp` is only for example purposes.
+
 
 ```python
 from feast import FeatureStore
@@ -75,28 +80,8 @@ training_df = store.get_historical_features(
 print(training_df.head())
 ```
 
-To read the features for batch scoring, change the `entity_df` sql query to select the list of `driver_id` to score on. Additionally, the `event_timestamp` can be the current timestamp. Up
 
-```python
-training_df = store.get_historical_features(
-    entity_df=f"""
-            SELECT
-                driver_id,
-                CURRENT_TIMESTAMP AS event_timestamp
-            FROM demo_feast_driver_hourly_stats
-            WHERE event_timestamp BETWEEN (CURRENT_TIMESTAMP - INTERVAL '60' DAY) AND CURRENT_TIMESTAMP
-            GROUP BY driver_id
-        """,
-    features=[
-        "driver_hourly_stats:conv_rate",
-        "driver_hourly_stats:acc_rate",
-        "driver_hourly_stats:avg_daily_trips"
-    ],
-).to_df()
-print(training_df.head())
-```
-
-To see a complete (but not real-world), end-to-end example workflow example, see the `demo/test_workflow.py` script. This script is used for testing the complete feast functionality.
+The `feast-teradata` library allows you to use the complete set of feast APIs and functionality. Please refer to the official feast [quickstart](https://docs.feast.dev/getting-started/quickstart) for more details on the various things you can do. Additionally, if you want to see a complete (but not real-world), end-to-end example workflow example, see the `demo/test_workflow.py` script. This is used for testing the complete feast functionality.
 
 
 ## Release Notes
@@ -105,6 +90,7 @@ To see a complete (but not real-world), end-to-end example workflow example, see
 
 - Doc: Improve README with better getting started information. 
 - Fix: Remove pytest from requirements.txt
+- Fix: Set minimum python version to 3.8 due to feast dependency on pandas>=1.4.3
 
 
 ### 1.0.0
