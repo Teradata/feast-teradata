@@ -75,7 +75,7 @@ training_df = store.get_historical_features(
 print(training_df.head())
 ```
 
-To read the features for batch scoring, change the `entity_df` sql query to select the list of `driver_id` to score on. Additionally, the `event_timestamp` can be the current timestamp. In this example, we will simply take a list of the unique driver_id's in the example dataset. Typically, the entity list to score on is obtained from a different table. 
+To read the features for batch scoring, change the `entity_df` sql query to select the list of `driver_id` to score on. Additionally, the `event_timestamp` can be the current timestamp. Up
 
 ```python
 training_df = store.get_historical_features(
