@@ -9,7 +9,7 @@ The `feast-teradata` library adds support for Teradata as
 - OfflineStore 
 - OnlineStore
 
-Additional, the using Teradata as the registry is already supported via the `registry_type: sql` and included in our examples. This means that everything is located in Teradata. However, depending on the requirements, installation, etc, this can be mixed and matched with other systems as appropriate.  
+Additional, using Teradata as the registry (catalog) is already supported via the `registry_type: sql` and included in our examples. This means that everything is located in Teradata. However, depending on the requirements, installation, etc, this can be mixed and matched with other systems as appropriate.  
 
 ## Getting Started
 
@@ -35,12 +35,61 @@ demo/
     test_workflow.py
 ```
 
+From within the `demo` directory, execute the following feast command to apply (import/update) the repo definition into the registry. You will be able to see the registry metadata tables in the teradata database after running this command.
+
 ```bash
-python demo/test_workflow.py
+feast apply
 ```
+
+To see the registry information in the feast ui, run the following command. Note the --registry_ttl_sec is important as by default it polls every 5 seconds. 
+
+```bash
+feast ui --registry_ttl_sec=120
+```
+
+Now, lets batch read some features for training (or scoring)
+
+```python
+from feast import FeatureStore
+from datetime import datetime, timedelta
+from pytz import utc
+
+
+store = FeatureStore(repo_path="feature_repo")
+
+end_date = datetime.now().replace(microsecond=0, second=0, minute=0).astimezone(tz=utc)
+start_date = (end_date - timedelta(days=60)).astimezone(tz=utc)
+
+training_df = store.get_historical_features(
+    entity_df=f"""
+            SELECT
+                "driver_id",
+                CURRENT_TIMESTAMP as "event_timestamp"
+            FROM "{store.project}_feast_driver_hourly_stats"
+            WHERE "event_timestamp" BETWEEN '{start_date}' AND '{end_date}'
+            GROUP BY "driver_id"
+        """,
+    features=[
+        "driver_hourly_stats:conv_rate",
+        "driver_hourly_stats:acc_rate",
+        "driver_hourly_stats:avg_daily_trips",
+        "transformed_conv_rate:conv_rate_plus_val1",
+        "transformed_conv_rate:conv_rate_plus_val2",
+    ],
+).to_df()
+print(training_df.head())
+```
+
+To see a complete, end-to-end example workflow example, see the `demo/test_workflow.py` script. This script is used for testing the complete feast functionality.
 
 
 ## Release Notes
+
+### 1.0.1
+
+- Doc: Improve README with better getting started information. 
+- Fix: Remove pytest from requirements.txt
+
 
 ### 1.0.0
 

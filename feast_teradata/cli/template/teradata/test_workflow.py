@@ -1,9 +1,9 @@
 import random
 import subprocess
-from datetime import datetime, timedelta
-
 import pandas as pd
 import yaml
+
+from datetime import datetime, timedelta
 from pytz import utc
 
 from feast import FeatureStore
