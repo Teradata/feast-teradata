@@ -50,7 +50,7 @@ feast ui --registry_ttl_sec=120
 
 ## Example Usage
 
-Now, lets batch read some features for training taking only entities for which we have seen an event for in the last `60` days. This filter could be on anything that is relevant for the entity (population) selection for the given training dataset.
+Now, lets batch read some features for training, using only entities (population) for which we have seen an event for in the last `60` days. The predicates (filter) used can be on anything that is relevant for the entity (population) selection for the given training dataset. The `event_timestamp` is only for example purposes.
 
 ```python
 from feast import FeatureStore
@@ -75,14 +75,25 @@ training_df = store.get_historical_features(
 print(training_df.head())
 ```
 
-To get the features for batch scoring, we would only change the `entity_df` sql query to select the list of `driver_id` to score on. Additionally, the `event_timestamp` can be the current timestamp for example in this scenario. 
+To read the features for batch scoring, change the `entity_df` sql query to select the list of `driver_id` to score on. Additionally, the `event_timestamp` can be the current timestamp. In this example, we will simply take a list of the unique driver_id's in the example dataset. Typically, the entity list to score on is obtained from a different table. 
 
-```sql
-SELECT
-    "driver_id",
-    CURRENT_TIMESTAMP AS "event_timestamp"
-FROM <relevant-entity-table>
-WHERE <relevant predicates>
+```python
+training_df = store.get_historical_features(
+    entity_df=f"""
+            SELECT
+                driver_id,
+                CURRENT_TIMESTAMP AS event_timestamp
+            FROM demo_feast_driver_hourly_stats
+            WHERE event_timestamp BETWEEN (CURRENT_TIMESTAMP - INTERVAL '60' DAY) AND CURRENT_TIMESTAMP
+            GROUP BY driver_id
+        """,
+    features=[
+        "driver_hourly_stats:conv_rate",
+        "driver_hourly_stats:acc_rate",
+        "driver_hourly_stats:avg_daily_trips"
+    ],
+).to_df()
+print(training_df.head())
 ```
 
 To see a complete (but not real-world), end-to-end example workflow example, see the `demo/test_workflow.py` script. This script is used for testing the complete feast functionality.
