@@ -47,6 +47,9 @@ To see the registry information in the feast ui, run the following command. Note
 feast ui --registry_ttl_sec=120
 ```
 
+
+## Example Usage
+
 Now, lets batch read some features for training taking only entities for which we have seen an event for in the last `60` days. This filter could be on anything that is relevant for the entity (population) selection for the given training dataset.
 
 ```python
