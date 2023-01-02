@@ -35,7 +35,7 @@ demo/
     test_workflow.py
 ```
 
-From within the `demo` directory, execute the following feast command to apply (import/update) the repo definition into the registry. You will be able to see the registry metadata tables in the teradata database after running this command.
+From within the `demo/feature_repo` directory, execute the following feast command to apply (import/update) the repo definition into the registry. You will be able to see the registry metadata tables in the teradata database after running this command.
 
 ```bash
 feast apply
@@ -47,34 +47,27 @@ To see the registry information in the feast ui, run the following command. Note
 feast ui --registry_ttl_sec=120
 ```
 
-Now, lets batch read some features for training (or scoring)
+Now, lets batch read some features for training (or batch scoring)
 
 ```python
 from feast import FeatureStore
-from datetime import datetime, timedelta
-from pytz import utc
 
 
 store = FeatureStore(repo_path="feature_repo")
 
-end_date = datetime.now().replace(microsecond=0, second=0, minute=0).astimezone(tz=utc)
-start_date = (end_date - timedelta(days=60)).astimezone(tz=utc)
-
 training_df = store.get_historical_features(
     entity_df=f"""
             SELECT
-                "driver_id",
-                CURRENT_TIMESTAMP as "event_timestamp"
-            FROM "{store.project}_feast_driver_hourly_stats"
-            WHERE "event_timestamp" BETWEEN '{start_date}' AND '{end_date}'
-            GROUP BY "driver_id"
+                driver_id,
+                CURRENT_TIMESTAMP as event_timestamp
+            FROM demo_feast_driver_hourly_stats
+            WHERE event_timestamp BETWEEN (CURRENT_TIMESTAMP - INTERVAL '60' DAY) AND CURRENT_TIMESTAMP
+            GROUP BY driver_id
         """,
     features=[
         "driver_hourly_stats:conv_rate",
         "driver_hourly_stats:acc_rate",
-        "driver_hourly_stats:avg_daily_trips",
-        "transformed_conv_rate:conv_rate_plus_val1",
-        "transformed_conv_rate:conv_rate_plus_val2",
+        "driver_hourly_stats:avg_daily_trips"
     ],
 ).to_df()
 print(training_df.head())
