@@ -87,6 +87,12 @@ Additionally, if you want to see a complete (but not real-world), end-to-end exa
 
 ## Repo Configuration
 
+A feast repository is configured via the `feature_store.yaml`. There are 3 sections in this that can be configured to use Teradata 
+
+- Registry
+- OfflineStore
+- OnlineStore
+
 To configure Teradata as the `OnlineStore`, use the following configuration
 ```yaml
 online_store:
