@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+from feast_teradata import __version__
 
 with open('requirements.txt') as f:
     required = f.read().splitlines()
@@ -8,13 +9,13 @@ with open("README.md") as f:
 
 setup(
     name="feast-teradata",
-    version="1.0.0",
+    version=__version__,
     author="Teradata Corporation",
     author_email="developers@teradata.com",
     url="https://github.com/Teradata/feast-teradata",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    python_requires=">=3.8",
+    python_requires=">=3.8,<3.11",
     packages=find_packages(exclude=('tests',)),
     package_data={
         'feast_teradata.cli': [
