@@ -124,6 +124,11 @@ registry:
 
 ## Release Notes
 
+### 1.0.2
+
+- Doc: Improve README with details on repo configuration
+- Fix: Fix Github Release on CI Release
+
 ### 1.0.1
 
 - Doc: Improve README with better getting started information. 
