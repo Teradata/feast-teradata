@@ -91,24 +91,30 @@ To configure Teradata as the `OnlineStore`, use the following configuration
 ```yaml
 online_store:
     type: feast_teradata.online.teradata.TeradataOnlineStore
-    host: Teradata host URL
-    database: Teradata database
-    user: Teradata user
-    password: Teradata password
-    log_mech: Teradata log_mech
+    host: <host>
+    database: <db>
+    user: <user>
+    password: <password>
+    log_mech: <TDNEGO|LDAP|etc>
 ```
 
-To configure Teradata as the `OnlineStore`, use the following configuration
+To configure Teradata as the `OfflineStore`, use the following configuration
 ```yaml
 offline_store:
     type: feast_teradata.offline.teradata.TeradataOfflineStore
-    host: Teradata host URL
-    database: Teradata database
-    user: Teradata user
-    password: Teradata password
-    log_mech: Teradata log_mech
+    host: <host>
+    database: <db>
+    user: <user>
+    password: <password>
+    log_mech: <TDNEGO|LDAP|etc>
 ```
 
+To configure Teradata as the `Registry`, configure the `registry_type` as `sql` and the path as the sqlalchemy url for teradata as follows
+```yaml
+registry:
+    registry_type: sql
+    path: teradatasql://<user>:<password>@<host>/?database=<database>&LOGMECH=<TDNEGO|LDAP|etc>
+```
 
 ## Release Notes
 
