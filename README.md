@@ -81,7 +81,33 @@ print(training_df.head())
 ```
 
 
-The `feast-teradata` library allows you to use the complete set of feast APIs and functionality. Please refer to the official feast [quickstart](https://docs.feast.dev/getting-started/quickstart) for more details on the various things you can do. Additionally, if you want to see a complete (but not real-world), end-to-end example workflow example, see the `demo/test_workflow.py` script. This is used for testing the complete feast functionality.
+The `feast-teradata` library allows you to use the complete set of feast APIs and functionality. Please refer to the official [feast quickstart](https://docs.feast.dev/getting-started/quickstart) for more details on the various things you can do. 
+
+Additionally, if you want to see a complete (but not real-world), end-to-end example workflow example, see the `demo/test_workflow.py` script. This is used for testing the complete feast functionality.
+
+## Repo Configuration
+
+To configure Teradata as the `OnlineStore`, use the following configuration
+```yaml
+online_store:
+    type: feast_teradata.online.teradata.TeradataOnlineStore
+    host: Teradata host URL
+    database: Teradata database
+    user: Teradata user
+    password: Teradata password
+    log_mech: Teradata log_mech
+```
+
+To configure Teradata as the `OnlineStore`, use the following configuration
+```yaml
+offline_store:
+    type: feast_teradata.offline.teradata.TeradataOfflineStore
+    host: Teradata host URL
+    database: Teradata database
+    user: Teradata user
+    password: Teradata password
+    log_mech: Teradata log_mech
+```
 
 
 ## Release Notes

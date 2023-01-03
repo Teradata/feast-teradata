@@ -48,6 +48,6 @@ jobs:
         with:
           tag_name: v${{ github.event.inputs.releaseVersion }}
           release_name: feast-teradata v${{ github.event.inputs.releaseVersion }}
-          body_path: ./CHANGELOG.md
+          body: feast-teradata v${{ github.event.inputs.releaseVersion }}
           draft: false
           prerelease: false
