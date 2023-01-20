@@ -81,10 +81,53 @@ print(training_df.head())
 ```
 
 
-The `feast-teradata` library allows you to use the complete set of feast APIs and functionality. Please refer to the official feast [quickstart](https://docs.feast.dev/getting-started/quickstart) for more details on the various things you can do. Additionally, if you want to see a complete (but not real-world), end-to-end example workflow example, see the `demo/test_workflow.py` script. This is used for testing the complete feast functionality.
+The `feast-teradata` library allows you to use the complete set of feast APIs and functionality. Please refer to the official [feast quickstart](https://docs.feast.dev/getting-started/quickstart) for more details on the various things you can do. 
 
+Additionally, if you want to see a complete (but not real-world), end-to-end example workflow example, see the `demo/test_workflow.py` script. This is used for testing the complete feast functionality.
+
+## Repo Configuration
+
+A feast repository is configured via the `feature_store.yaml`. There are 3 sections in this that can be configured to use Teradata 
+
+- Registry
+- OfflineStore
+- OnlineStore
+
+To configure Teradata as the `OnlineStore`, use the following configuration
+```yaml
+online_store:
+    type: feast_teradata.online.teradata.TeradataOnlineStore
+    host: <host>
+    database: <db>
+    user: <user>
+    password: <password>
+    log_mech: <TDNEGO|LDAP|etc>
+```
+
+To configure Teradata as the `OfflineStore`, use the following configuration
+```yaml
+offline_store:
+    type: feast_teradata.offline.teradata.TeradataOfflineStore
+    host: <host>
+    database: <db>
+    user: <user>
+    password: <password>
+    log_mech: <TDNEGO|LDAP|etc>
+```
+
+To configure Teradata as the `Registry`, configure the `registry_type` as `sql` and the path as the sqlalchemy url for teradata as follows
+```yaml
+registry:
+    registry_type: sql
+    path: teradatasql://<user>:<password>@<host>/?database=<database>&LOGMECH=<TDNEGO|LDAP|etc>
+```
 
 ## Release Notes
+
+### 1.0.2
+
+- Doc: Improve README with details on repo configuration
+- Fix: Fix Github Release on CI Release
 
 ### 1.0.1
 

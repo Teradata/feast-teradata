@@ -34,11 +34,11 @@ def bootstrap():
     # check if running in interactive mode or via CI
     is_interactive = os.environ.get("CI_RUNNING", "false").lower() == "false"
     if is_interactive:
-        host = click.prompt("Teradata Host URL: ")
-        teradata_user = click.prompt("Teradata User Name:")
-        teradata_password = click.prompt("Teradata Password:", hide_input=True)
-        teradata_database = click.prompt("Teradata Database Name:")
-        teradata_log_mech = click.prompt("Teradata Connection Mechanism:")
+        host = click.prompt("Teradata Host URL")
+        teradata_user = click.prompt("Teradata User Name")
+        teradata_password = click.prompt("Teradata Password", hide_input=True)
+        teradata_database = click.prompt("Teradata Database Name")
+        teradata_log_mech = click.prompt("Teradata Connection Mechanism")
 
     else:
         host = os.environ.get("CI_TD_HOST")
