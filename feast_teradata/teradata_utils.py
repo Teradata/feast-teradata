@@ -23,7 +23,8 @@ def teradata_type_to_feast_value_type(data_type):
     type_map: Dict[str, ValueType] = {
         "<class 'int'>": pa.int64(),
         "<class 'float'>": pa.float64(),
-        "<class 'datetime.datetime'>": pa.timestamp('ns')  # TODO: Add more mappings here
+        "<class 'datetime.datetime'>": pa.timestamp('ns'),
+        "<class 'str'>": pa.string()
     }
 
     return type_map[str(data_type)]
