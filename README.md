@@ -124,10 +124,15 @@ registry:
 
 ## Release Notes
 
+### 1.0.3
+
+- Fix: Added string mapping for columns. 
+
 ### 1.0.2
 
 - Doc: Improve README with details on repo configuration
 - Fix: Fix Github Release on CI Release
+- Fix: Updated path variable to become OS independent.
 
 ### 1.0.1
 
