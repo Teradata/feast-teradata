@@ -1,2 +1,2 @@
 teradataml>=17.0.0.4
-feast==0.26.0
+feast==0.31.1
