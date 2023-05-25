@@ -124,6 +124,10 @@ registry:
 
 ## Release Notes
 
+### 1.0.4
+
+- Update: bump Feast dependency to 0.28.0 
+
 ### 1.0.3
 
 - Fix: Added string mapping for columns. 

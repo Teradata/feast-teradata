@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         python: ['3.8', '3.9', '3.10']
-    runs-on: macos-11
+    runs-on: ubuntu-latest
     name: Functional test
     steps:
       - name: Setup Python
@@ -22,63 +22,33 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
 
-      - name: Download Vantage Express
-        shell: bash
+      - name: Define env name
+        id: define-environment-name
         run: |
-          brew install hudochenkov/sshpass/sshpass
-          echo "my IP address is: " $(ipconfig getifaddr en0)
-          mkdir /tmp/downloads
-          cd /tmp/downloads
-          curl -L $VE_URL_SIGNATURE --compressed -o ve.7z
-        env:
-          VE_URL_SIGNATURE: ${{ secrets.VE_URL_SIGNATURE }}
+          echo "env-name=feast-teradata-ci-$(date +%s%N)" >> $GITHUB_OUTPUT
 
-      - name: Unzip Vantage Express
-        shell: bash
+      - name: Start test environment
+        id: start-test-environment
         run: |
-          cd /tmp/downloads
-          7z x ve.7z
-      - name: Install Vantage Express
-        shell: bash
-        run: |
-          export VM_IMAGE_DIR="/tmp/downloads/VantageExpress17.20_Sles12"
-          DEFAULT_VM_NAME="vantage-express"
-          VM_NAME="${VM_NAME:-$DEFAULT_VM_NAME}"
-          vboxmanage createvm --name "$VM_NAME" --register --ostype openSUSE_64
-          vboxmanage modifyvm "$VM_NAME" --ioapic on --memory 6000 --vram 128 --nic1 nat --cpus 3
-          vboxmanage storagectl "$VM_NAME" --name "SATA Controller" --add sata --controller IntelAhci
-          vboxmanage storageattach "$VM_NAME" --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium  "$(find $VM_IMAGE_DIR -name '*disk1*')"
-          vboxmanage storageattach "$VM_NAME" --storagectl "SATA Controller" --port 1 --device 0 --type hdd --medium  "$(find $VM_IMAGE_DIR -name '*disk2*')"
-          vboxmanage storageattach "$VM_NAME" --storagectl "SATA Controller" --port 2 --device 0 --type hdd --medium  "$(find $VM_IMAGE_DIR -name '*disk3*')"
-          vboxmanage modifyvm "$VM_NAME" --natpf1 "tdssh,tcp,,4422,,22"
-          vboxmanage modifyvm "$VM_NAME" --natpf1 "tddb,tcp,,1025,,1025"
-          vboxmanage startvm "$VM_NAME" --type headless
-
-      - name: Install TTU
-        shell: bash
-        run: |
-          curl -L $TTU_URL_SIGNATURE --compressed -o ttu.tar.gz
-          tar -xzf ttu.tar.gz
-          installer -pkg ./TeradataToolsAndUtilitiesBase/*.pkg -target CurrentUserHomeDirectory
+          RESULT=$(curl --location --request POST 'https://api.clearscape.teradata.com/environments' \
+            --header "Authorization: Bearer $CSAE_TOKEN" \
+            --header 'Content-Type: application/json' \
+            --data-raw "{
+                \"name\": \"$CSAE_ENV_NAME\",
+                \"region\": \"us-central\",
+                \"password\": \"$CSAE_ENV_PASSWORD\"
+            }")
+          DB_HOST=$(echo $RESULT | jq -r '.dnsName')
+          echo "db-host=$DB_HOST" >> $GITHUB_OUTPUT
         env:
-          TTU_URL_SIGNATURE: ${{ secrets.TTU_URL_SIGNATURE }}
+          CSAE_TOKEN: '${{ secrets.CSAE_TOKEN }}'
+          CSAE_ENV_PASSWORD: '${{ secrets.CSAE_ENV_PASSWORD }}'
+          CSAE_ENV_NAME: '${{ steps.define-environment-name.outputs.env-name }}'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
-          # install timeout command
-          export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=yes
-          export HOMEBREW_NO_INSTALL_CLEANUP=yes
-          export HOMEBREW_NO_INSTALL_UPGRADE=yes
-          brew install coreutils jq
-      - name: Verify Vantage Express is running
-        shell: bash
-        run: ./.github/workflows/scripts/verifyVantageIsRunning.sh
-
-      - name: Create test database
-        shell: bash
-        run: ./.github/workflows/scripts/createDatabase.sh
 
       - name: Build and install package
         run: |
@@ -90,10 +60,19 @@ jobs:
           feast-td init-repo
           cd test_repo && python test_workflow.py
         env:
-          CI_RUNNING: "true"
-          CI_TD_HOST: "127.0.0.1"
-          CI_TD_USER: "dbc"
-          CI_TD_PASSWORD: "dbc"
-          CI_TD_DATABASE: "DBT_TEST"
-          CI_TD_LOGMECH: "TDNEGO"
-          CI_FEAST_REPO_NAME: "test_repo"
+          CI_RUNNING: 'true'
+          CI_TD_HOST: '${{ steps.start-test-environment.outputs.dbc-host }}'
+          CI_TD_USER: 'demo_user'
+          CI_TD_PASSWORD: '${{ secrets.CSAE_ENV_PASSWORD }}'
+          CI_TD_DATABASE: 'demo_user'
+          CI_TD_LOGMECH: 'TDNEGO'
+          CI_FEAST_REPO_NAME: 'test_repo'
+
+      - name: Delete test environment
+        if: always()
+        run: |
+          curl --location --request DELETE "https://api.clearscape.teradata.com/environments/$CSAE_ENV_NAME" \
+            --header "Authorization: Bearer $CSAE_TOKEN"
+        env:
+          CSAE_TOKEN: '${{ secrets.CSAE_TOKEN }}'
+          CSAE_ENV_NAME: '${{ steps.define-environment-name.outputs.env-name }}'
