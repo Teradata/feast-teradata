@@ -120,9 +120,14 @@ To configure Teradata as the `Registry`, configure the `registry_type` as `sql` 
 registry:
     registry_type: sql
     path: teradatasql://<user>:<password>@<host>/?database=<database>&LOGMECH=<TDNEGO|LDAP|etc>
+    cache_ttl_seconds: 120
 ```
 
 ## Release Notes
+
+### 1.0.4
+
+- Update: bump Feast dependency to 0.31.1 
 
 ### 1.0.3
 

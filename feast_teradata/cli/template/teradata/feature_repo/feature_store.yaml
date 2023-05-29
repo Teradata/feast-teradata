@@ -2,6 +2,7 @@ project: my_project
 registry:
     registry_type: sql
     path: Teradata registry path
+    cache_ttl_seconds: 120
 provider: local
 online_store:
     type: feast_teradata.online.teradata.TeradataOnlineStore
