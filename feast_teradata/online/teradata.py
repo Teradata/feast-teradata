@@ -176,7 +176,7 @@ class TeradataOnlineStore(OnlineStore):
                 result.append((res_ts, res))
         return result
 
-    @log_exceptions_and_usage(online_store="snowflake")
+    @log_exceptions_and_usage(online_store="teradata")
     def update(
             self,
             config: RepoConfig,

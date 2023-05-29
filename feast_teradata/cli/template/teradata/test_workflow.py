@@ -35,6 +35,9 @@ def run_demo():
     print("\n--- Load features into online store ---")
     store.materialize_incremental(end_date=datetime.now())
 
+    print("\n--- Refreshing registry ---")
+    store.refresh_registry()
+
     print("\n--- Online features ---")
     fetch_online_features(store)
 
